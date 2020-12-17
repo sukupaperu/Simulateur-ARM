@@ -2,3 +2,9 @@
 *.o
 *.exe
 *.bin
+.deps
+Makefile
+stamp-h1
+config.h
+config.log
+config.status
