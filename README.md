@@ -2,7 +2,7 @@
 
 ## Description
 
-This is yet another ARM processor simulator
+This is yet another ARM processor simulator.<br/>
 More precisely, this is an ARMv5 instruction set emulator. Thus, it is neither
 cycle accurate, nor very efficient. It has been designed as a teaching tool,
 with modular sources and memory/processor transactions trace capabilities.
@@ -14,10 +14,12 @@ with modular sources and memory/processor transactions trace capabilities.
 The main program, arm_simulator acts as a gdb server, so a typical use session
 would look like:<br/>
 `./arm_simulator`<br/>
-this starts the simulator which waits for two kinds of incoming connections:
+<br/>
+This starts the simulator which waits for two kinds of incoming connections:
 - a connection from a gdb client
 - a connection from the external command used to send irqs to the simulator
-the simulator prints on the screen the ports numbers on which it listens for
+
+The simulator prints on the screen the ports numbers on which it listens for
 these connections.
 
 To use the simulator, you must connect to it a gdb client:
@@ -46,7 +48,7 @@ The simulator sources are organized as follows (← denotes dependences) :
 `messages` : debug and warning messages functions<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;← *nothing*
 
-`memory` : memory area management with byte/half/word accesses and per access<br/> choosable endianess
+`memory` : memory area management with byte/half/word accesses and per access choosable endianess<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;← *nothing*
 
 `arm_constants` : some definitions about arm execution modes<br/>
