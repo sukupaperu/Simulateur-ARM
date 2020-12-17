@@ -82,5 +82,5 @@ The simulator sources are organized as follows (← denotes dependences) :
 `arm_simulator` : main simulator that acts as a gdb server<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;← arm_core, memory, gdb_scanner, gdb_protocol
 
-`send_irq` : small command to send exception to a running simulator <br/>
+`send_irq` : small command to send exception to a running simulator<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;← *nothing*
