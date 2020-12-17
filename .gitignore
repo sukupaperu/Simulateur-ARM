@@ -3,8 +3,16 @@
 *.exe
 *.bin
 .deps
+
 Makefile
+
 stamp-h1
 config.h
 config.log
 config.status
+
+arm_simulator
+memory_test
+send_irq
+
+Examples/example[0-9]
