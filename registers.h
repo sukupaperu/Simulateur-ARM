@@ -106,7 +106,7 @@ uint32_t read_spsr(registers r);
 void write_register(registers r, uint8_t reg, uint32_t value);
 
 /*
-	Entrée : un groupe de registres, le numéro d'un registre cible, une valeur é écrire dans ce registre
+	Entrée : un groupe de registres, le numéro d'un registre cible, une valeur à écrire dans ce registre
 	si reg n'est pas dans la plage [0..15], la fonction ne fait rien
 	Sortie : void
 	Effets de bords : la valeur value est écrite dans le registre de numéro reg, comme si le mode était user
