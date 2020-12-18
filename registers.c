@@ -45,7 +45,7 @@ struct registers_data {
 
 
 registers registers_create() {
-    registers r = malloc(sizeof(registers_data));
+    registers r = malloc(sizeof(struct registers_data));
 
     if (r != NULL) {
         // rappel : calloc(a, sizeof(b)) équivaut à malloc(a * sizeof(b)) mais le tableau est initialisé à 0
@@ -62,6 +62,9 @@ registers registers_create() {
         free(r);
         r = NULL;
     }
+
+    // on démarre les registres en mode System
+    r->psr_registers[0] = MODE_SYSTEM;
     
     return r;
 }
@@ -73,7 +76,6 @@ void registers_destroy(registers r) {
         free(r->banked_registers);
         free(r->psr_registers);
         free(r);
-        r = NULL;
     }
 }
 
