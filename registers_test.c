@@ -74,6 +74,49 @@ int main(int argc, char** argv) {
     // ainsi que son propre SPSR
     assert(read_spsr(r) == 0);
 
+    /* SI VOUS VOULEZ AJOUTER DES TESTS POUR LES MODES AUTRES QUE USER, METTEZ-LES ICI */
+
+    // on écrit les valeurs de R0 à R15
+    // amélioration possible : aussi écrire les valeurs des registres banked et des PSR (mais comme à ce moment on est en User, on ne peut plus changer de mode)
+    printf("Valeurs brutes de registers à la fin des tests :\n");
+
+    for(int i = 0; i < 16; i++) {
+        printf("R%d : 0x%x\n", i, read_usr_register(r, i)); // multiples de 2
+    }
+
+    printf("\nCPSR : 0x%x\n", read_cpsr(r)); // 0x00000013
+
+    printf("\nR13_svc : 0x%x\n", read_register(r, 13)); // 0
+    printf("R14_svc : 0x%x\n", read_register(r, 14)); // 0
+    printf("SPSR_svc : 0x%x\n\n", read_spsr(r)); // 0
+
+    write_cpsr(r, MODE_ABORT);
+    printf("R13_abt : 0x%x\n", read_register(r, 13)); // 0
+    printf("R14_abt : 0x%x\n", read_register(r, 14)); // 0
+    printf("SPSR_abt : 0x%x\n\n", read_spsr(r)); // 0
+    
+    write_cpsr(r, MODE_UNDEFINED);
+    printf("R13_und : 0x%x\n", read_register(r, 13)); // 0
+    printf("R14_und : 0x%x\n", read_register(r, 14)); // 0
+    printf("SPSR_und : 0x%x\n\n", read_spsr(r)); // 0
+    
+    write_cpsr(r, MODE_IRQ);
+    printf("R13_irq : 0x%x\n", read_register(r, 13)); // 0
+    printf("R14_irq : 0x%x\n", read_register(r, 14)); // 0
+    printf("SPSR_irq : 0x%x\n\n", read_spsr(r)); // 0
+    
+    write_cpsr(r, MODE_FIQ);
+    printf("R8_fiq : 0x%x\n", read_register(r, 8)); // 0
+    printf("R9_fiq : 0x%x\n", read_register(r, 9)); // 0
+    printf("R10_fiq : 0x%x\n", read_register(r, 10)); // 0
+    printf("R11_fiq : 0x%x\n", read_register(r, 11)); // 0
+    printf("R12_fiq : 0x%x\n", read_register(r, 12)); // 1
+    printf("R13_fiq : 0x%x\n", read_register(r, 13)); // 0
+    printf("R14_fiq : 0x%x\n", read_register(r, 14)); // 0
+    printf("SPSR_fiq : 0x%x\n\n", read_spsr(r)); // 0xF80F03DF
+
+    /* Les tests du mode USER vont à la fin car une fois dans ce mode, on ne peut plus changer de mode (on ne peut plus écrire dans CPSR[4:0]) */
+
     // on passe en mode USER
     write_cpsr(r, MODE_USER);
     // simple vérification pour savoir si le mode a été bien écrit
@@ -88,18 +131,11 @@ int main(int argc, char** argv) {
 
     printf("Tests réussis.\n");
 
-    // on écrit les valeurs de R0 à R15
-    // amélioration possible : aussi écrire les valeurs des registres banked et des PSR (mais comme à ce moment on est en User, on ne peut plus changer de mode)
-    printf("Valeurs brutes de registers à la fin des tests :\n");
-
-    for(int i = 0; i < 16; i++) {
-        printf("R%d : 0x%x\n", i, read_usr_register(r, i));
-    }
-
     // désallocation des registres
     registers_destroy(r);
     // la mémoire a été libérée mais r pointe toujours dessus. Pour faire propre et ne plus pouvoir s'en servir, on met r à NULL
     r = NULL;
 
+    // a winner is you
     return 0;
 }
