@@ -64,7 +64,7 @@ registers registers_create() {
     }
 
     // on démarre les registres en mode System
-    r->psr_registers[0] = MODE_SYSTEM;
+    r->psr_registers[0] = SYS;
     
     return r;
 }
@@ -90,7 +90,7 @@ uint8_t get_mode(registers r) {
 int current_mode_has_spsr(registers r) {
     uint8_t current_mode = get_mode(r);
 
-    if (current_mode != MODE_USER && current_mode != MODE_SYSTEM) {
+    if (current_mode != USR && current_mode != SYS) {
         return 1;
     } else {
         return 0;
@@ -101,7 +101,7 @@ int current_mode_has_spsr(registers r) {
 int in_a_privileged_mode(registers r) {
     uint8_t current_mode = get_mode(r);
 
-    if (current_mode != MODE_USER) {
+    if (current_mode != USR) {
         return 1;
     } else {
         return 0;
@@ -125,12 +125,12 @@ uint32_t read_register(registers r, uint8_t reg) {
             uint8_t current_mode = get_mode(r);
 
             // registres communs (R8 à R12) à tous sauf FIQ
-            if (current_mode != MODE_FIQ && reg < 13) {
+            if (current_mode != FIQ && reg < 13) {
 
                 value = r->main_registers[reg];
 
             // registres R8 à R14 spécifiques à FIQ
-            } else if (current_mode == MODE_FIQ) {
+            } else if (current_mode == FIQ) {
 
                 value = r->banked_registers[reg];
 
@@ -138,13 +138,13 @@ uint32_t read_register(registers r, uint8_t reg) {
             // ce code peut être factorisé mais aux dépends de la lisibilité
             } else {
 
-                if (current_mode == MODE_SUPERVISOR) {
+                if (current_mode == SVC) {
                     value = r->banked_registers[(reg % 2)];
-                } else if (current_mode == MODE_ABORT) {
+                } else if (current_mode == ABT) {
                     value = r->banked_registers[(reg % 2) + 2];
-                } else if (current_mode == MODE_UNDEFINED) {
+                } else if (current_mode == UND) {
                     value = r->banked_registers[(reg % 2) + 4];
-                // si on arrive là, on est forcément en MODE_IRQ (en supposant que CPSR[4:0] soit un mode valide)
+                // si on arrive là, on est forcément en IRQ (en supposant que CPSR[4:0] soit un mode valide)
                 } else {
                     value = r->banked_registers[(reg % 2) + 6];
                 }
@@ -182,15 +182,15 @@ uint32_t read_spsr(registers r) {
     if (current_mode_has_spsr(r)) {
         uint8_t current_mode = get_mode(r);
 
-        if (current_mode == MODE_SUPERVISOR) {
+        if (current_mode == SVC) {
             value = r->psr_registers[1];
-        } else if (current_mode == MODE_ABORT) {
+        } else if (current_mode == ABT) {
             value = r->psr_registers[2];
-        } else if (current_mode == MODE_UNDEFINED) {
+        } else if (current_mode == UND) {
             value = r->psr_registers[3];
-        } else if (current_mode == MODE_IRQ) {
+        } else if (current_mode == IRQ) {
             value = r->psr_registers[4];
-        // à ce moment on est en MODE_FIQ si le code du mode est correct
+        // à ce moment on est en FIQ si le code du mode est correct
         } else {
             value = r->psr_registers[5];
         }
@@ -214,12 +214,12 @@ void write_register(registers r, uint8_t reg, uint32_t value) {
             uint8_t current_mode = get_mode(r);
 
             // registres communs (R8 à R12) à tous sauf FIQ
-            if (current_mode != MODE_FIQ && reg < 13) {
+            if (current_mode != FIQ && reg < 13) {
 
                 r->main_registers[reg] = value;
 
             // registres R8 à R14 spécifiques à FIQ
-            } else if (current_mode == MODE_FIQ) {
+            } else if (current_mode == FIQ) {
 
                 r->banked_registers[reg] = value;
 
@@ -227,13 +227,13 @@ void write_register(registers r, uint8_t reg, uint32_t value) {
             // ce code peut être factorisé mais aux dépends de la lisibilité
             } else {
 
-                if (current_mode == MODE_SUPERVISOR) {
+                if (current_mode == SVC) {
                     r->banked_registers[(reg % 2)] = value;
-                } else if (current_mode == MODE_ABORT) {
+                } else if (current_mode == ABT) {
                     r->banked_registers[(reg % 2) + 2] = value;
-                } else if (current_mode == MODE_UNDEFINED) {
+                } else if (current_mode == UND) {
                     r->banked_registers[(reg % 2) + 4] = value;
-                // si on arrive là, on est forcément en MODE_IRQ (en supposant que CPSR[4:0] soit un mode valide)
+                // si on arrive là, on est forcément en IRQ (en supposant que CPSR[4:0] soit un mode valide)
                 } else {
                     r->banked_registers[(reg % 2) + 6] = value;
                 }
@@ -293,15 +293,15 @@ void write_spsr(registers r, uint32_t value) {
         value = value | masque;
         int n = 1;
 
-        if (current_mode == MODE_SUPERVISOR) {
+        if (current_mode == SVC) {
             n = 1;
-        } else if (current_mode == MODE_ABORT) {
+        } else if (current_mode == ABT) {
             n = 2;
-        } else if (current_mode == MODE_UNDEFINED) {
+        } else if (current_mode == UND) {
             n = 3;
-        } else if (current_mode == MODE_IRQ) {
+        } else if (current_mode == IRQ) {
             n = 4;
-        // à ce moment on est en MODE_FIQ si current_mode est correct
+        // à ce moment on est en FIQ si current_mode est correct
         } else {
             n = 5;
         }
