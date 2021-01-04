@@ -26,14 +26,6 @@ Contact: Guillaume.Huard@imag.fr
 
 // La spécification et documentation pour tout ce qui concerne les registres se trouve à la section A2.3 Registers (page 42 du PDF) du Reference Manual
 
-#define MODE_USER 0x10
-#define MODE_SYSTEM 0x1F
-#define MODE_FIQ 0x11
-#define MODE_IRQ 0x12
-#define MODE_SUPERVISOR 0x13
-#define MODE_ABORT 0x17
-#define MODE_UNDEFINED 0x1B
-
 // la structure registers, qui est une interface (l'utilisateur n'a pas besoin de savoir comment elle est implémentée, il n'a qu'à s'en servir grâce aux fonctions données)
 typedef struct registers_data *registers;
 
