@@ -18,3 +18,4 @@ send_irq
 Examples/example[0-9]
 
 *.stackdump
+*.gch
