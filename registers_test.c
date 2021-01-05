@@ -25,6 +25,7 @@ Contact: Guillaume.Huard@imag.fr
 #include <assert.h>
 #include "registers.h"
 #include "util.h"
+#include "arm_constants.h"
 
 
 /* Teste les fonctions de registers.h 
@@ -39,7 +40,7 @@ int main(int argc, char** argv) {
     assert(r != NULL);
 
     // le mode par défaut doit être SYSTEM
-    assert(get_mode(r) == MODE_SYSTEM);
+    assert(get_mode(r) == SYS);
     // c'est donc un mode privilégié
     assert(in_a_privileged_mode(r) == 1);
     // qui n'a pas de SPSR
@@ -57,7 +58,7 @@ int main(int argc, char** argv) {
     assert(read_cpsr(r) == 0xF80F03DF);
 
     // on passe en mode FIQ
-    write_cpsr(r, MODE_FIQ);
+    write_cpsr(r, FIQ);
     // dans ce mode un registre banked doit être différent, ici R8_fiq ne doit pas contenir le multiple de 2 écrit dans R8
     assert(read_register(r, 8) == 0);
     write_register(r, 12, 1);
@@ -66,7 +67,7 @@ int main(int argc, char** argv) {
     assert(read_spsr(r) == 0xF80F03DF);
 
     // on passe en mode Supervisor
-    write_cpsr(r, MODE_SUPERVISOR);
+    write_cpsr(r, SVC);
     // ce mode partage le même R8 que System, R8 doit donc contenir le multiple de 2 écrit plus haut
     assert(read_register(r, 8) == 256);
     // mais pas R13, car Supervisor possède son propre R13
@@ -90,22 +91,22 @@ int main(int argc, char** argv) {
     printf("R14_svc : 0x%x\n", read_register(r, 14)); // 0
     printf("SPSR_svc : 0x%x\n\n", read_spsr(r)); // 0
 
-    write_cpsr(r, MODE_ABORT);
+    write_cpsr(r, ABT);
     printf("R13_abt : 0x%x\n", read_register(r, 13)); // 0
     printf("R14_abt : 0x%x\n", read_register(r, 14)); // 0
     printf("SPSR_abt : 0x%x\n\n", read_spsr(r)); // 0
     
-    write_cpsr(r, MODE_UNDEFINED);
+    write_cpsr(r, UND);
     printf("R13_und : 0x%x\n", read_register(r, 13)); // 0
     printf("R14_und : 0x%x\n", read_register(r, 14)); // 0
     printf("SPSR_und : 0x%x\n\n", read_spsr(r)); // 0
     
-    write_cpsr(r, MODE_IRQ);
+    write_cpsr(r, IRQ);
     printf("R13_irq : 0x%x\n", read_register(r, 13)); // 0
     printf("R14_irq : 0x%x\n", read_register(r, 14)); // 0
     printf("SPSR_irq : 0x%x\n\n", read_spsr(r)); // 0
     
-    write_cpsr(r, MODE_FIQ);
+    write_cpsr(r, FIQ);
     printf("R8_fiq : 0x%x\n", read_register(r, 8)); // 0
     printf("R9_fiq : 0x%x\n", read_register(r, 9)); // 0
     printf("R10_fiq : 0x%x\n", read_register(r, 10)); // 0
@@ -118,7 +119,7 @@ int main(int argc, char** argv) {
     /* Les tests du mode USER vont à la fin car une fois dans ce mode, on ne peut plus changer de mode (on ne peut plus écrire dans CPSR[4:0]) */
 
     // on passe en mode USER
-    write_cpsr(r, MODE_USER);
+    write_cpsr(r, USR);
     // simple vérification pour savoir si le mode a été bien écrit
     assert(read_cpsr(r) == 0x00000010);
     // R12 de User n'est pas le même que R12 de FIQ. Il ne doit donc pas contenir la valeur qui a été écrite quand on était en FIQ
