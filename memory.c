@@ -1,38 +1,38 @@
 /*
-Armator - simulateur de jeu d'instruction ARMv5T à but pédagogique
+Armator - simulateur de jeu d'instruction ARMv5T ï¿½ but pï¿½dagogique
 Copyright (C) 2011 Guillaume Huard
 Ce programme est libre, vous pouvez le redistribuer et/ou le modifier selon les
-termes de la Licence Publique Générale GNU publiée par la Free Software
-Foundation (version 2 ou bien toute autre version ultérieure choisie par vous).
+termes de la Licence Publique Gï¿½nï¿½rale GNU publiï¿½e par la Free Software
+Foundation (version 2 ou bien toute autre version ultï¿½rieure choisie par vous).
 
-Ce programme est distribué car potentiellement utile, mais SANS AUCUNE
+Ce programme est distribuï¿½ car potentiellement utile, mais SANS AUCUNE
 GARANTIE, ni explicite ni implicite, y compris les garanties de
-commercialisation ou d'adaptation dans un but spécifique. Reportez-vous à la
-Licence Publique Générale GNU pour plus de détails.
+commercialisation ou d'adaptation dans un but spï¿½cifique. Reportez-vous ï¿½ la
+Licence Publique Gï¿½nï¿½rale GNU pour plus de dï¿½tails.
 
-Vous devez avoir reçu une copie de la Licence Publique Générale GNU en même
-temps que ce programme ; si ce n'est pas le cas, écrivez à la Free Software
+Vous devez avoir reï¿½u une copie de la Licence Publique Gï¿½nï¿½rale GNU en mï¿½me
+temps que ce programme ; si ce n'est pas le cas, ï¿½crivez ï¿½ la Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307,
-États-Unis.
+ï¿½tats-Unis.
 
 Contact: Guillaume.Huard@imag.fr
-	 Bâtiment IMAG
+	 Bï¿½timent IMAG
 	 700 avenue centrale, domaine universitaire
-	 38401 Saint Martin d'Hères
+	 38401 Saint Martin d'Hï¿½res
 */
 
-// Les pages 68 à 71 sont dédiées à l'espace mémoire et la gestion des adresses
+// Les pages 68 ï¿½ 71 sont dï¿½diï¿½es ï¿½ l'espace mï¿½moire et la gestion des adresses
 
 #include <stdlib.h>
 #include "memory.h"
 #include "util.h"
 
 struct memory_data {
-    // Type de boutisme de la mémoire
+    // Type de boutisme de la mï¿½moire
     int is_big_endian_type;
-    // Taille de la mémoire (en octets)
+    // Taille de la mï¿½moire (en octets)
     int size;
-    // Espace mémoire (sous forme d'entiers non signés sur 8 bits)
+    // Espace mï¿½moire (sous forme d'entiers non signï¿½s sur 8 bits)
     uint8_t* data;
 };
 
@@ -45,7 +45,7 @@ memory memory_create(size_t size, int is_big_endian) {
         mem->is_big_endian_type = is_big_endian;
     }
 
-    // Si l'allocation échoue ou que la taille est invalide on libère les espaces mémoires précédemment alloués
+    // Si l'allocation ï¿½choue ou que la taille est invalide on libï¿½re les espaces mï¿½moires prï¿½cï¿½demment allouï¿½s
     if (mem->data == NULL) {
         free(mem->data);
         free(mem);
@@ -65,19 +65,19 @@ void memory_destroy(memory mem) {
 }
 
 int memory_read_byte(memory mem, uint32_t address, uint8_t *value) {
-    // si on sélectionne une adresse en dehors de l'espace adressable
+    // si on sï¿½lectionne une adresse en dehors de l'espace adressable
     if(address > mem->size)
-        return 0;
+        return -1;
 
     *value = mem->data[address];
 
-    return 1;
+    return 0;
 }
 
 int memory_read_half(memory mem, uint32_t address, uint16_t *value) {
-    // si l'adresse n'est pas alignée sur un half ou que l'on sélectionne une adresse en dehors de l'espace adressable
+    // si l'adresse n'est pas alignï¿½e sur un half ou que l'on sï¿½lectionne une adresse en dehors de l'espace adressable
     if(get_bit(address, 0) != 0 || address + 1 > mem->size)
-        return 0;
+        return -1;
 
     // en fonction du type de boutisme de mem
     if(mem->is_big_endian_type)
@@ -85,13 +85,13 @@ int memory_read_half(memory mem, uint32_t address, uint16_t *value) {
     else
         *value = (mem->data[address + 1] << 8) | mem->data[address];
 
-    return 1;
+    return 0;
 }
 
 int memory_read_word(memory mem, uint32_t address, uint32_t *value) {
-    // si l'adresse n'est pas alignée sur un word ou que l'on sélectionne une adresse en dehors de l'espace adressable
+    // si l'adresse n'est pas alignï¿½e sur un word ou que l'on sï¿½lectionne une adresse en dehors de l'espace adressable
     if(get_bits(address, 1, 0) != 0 || address + 3 > mem->size)
-        return 0;
+        return -1;
 
     // en fonction du type de boutisme de mem
     if(mem->is_big_endian_type)
@@ -105,23 +105,23 @@ int memory_read_word(memory mem, uint32_t address, uint32_t *value) {
             | (mem->data[address + 1] << 8) 
             | mem->data[address];
 
-    return 1;
+    return 0;
 }
 
 int memory_write_byte(memory mem, uint32_t address, uint8_t value) {
-    // si on sélectionne une adresse en dehors de l'espace adressable
+    // si on sï¿½lectionne une adresse en dehors de l'espace adressable
     if(address > mem->size)
-        return 0;
+        return -1;
 
     mem->data[address] = value;
 
-    return 1;
+    return 0;
 }
 
 int memory_write_half(memory mem, uint32_t address, uint16_t value) {
-    // si l'adresse n'est pas alignée sur un half ou que l'on sélectionne une adresse en dehors de l'espace adressable
+    // si l'adresse n'est pas alignï¿½e sur un half ou que l'on sï¿½lectionne une adresse en dehors de l'espace adressable
     if(get_bit(address, 0) != 0 || address + 1 > mem->size)
-        return 0;
+        return -1;
 
     // en fonction du type de boutisme de mem
     if(mem->is_big_endian_type) {
@@ -132,13 +132,13 @@ int memory_write_half(memory mem, uint32_t address, uint16_t value) {
         mem->data[address] = value;
     }
 
-    return 1;
+    return 0;
 }
 
 int memory_write_word(memory mem, uint32_t address, uint32_t value) {
-    // si l'adresse n'est pas alignée sur un word ou que l'on sélectionne une adresse en dehors de l'espace adressable
+    // si l'adresse n'est pas alignï¿½e sur un word ou que l'on sï¿½lectionne une adresse en dehors de l'espace adressable
     if(get_bits(address, 1, 0) != 0 || address + 3 > mem->size)
-        return 0;
+        return -1;
 
     // en fonction du type de boutisme de mem
     if(mem->is_big_endian_type) {
@@ -153,5 +153,5 @@ int memory_write_word(memory mem, uint32_t address, uint32_t value) {
         mem->data[address] = value;
     }
 
-    return 1;
+    return 0;
 }
