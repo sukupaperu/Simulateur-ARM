@@ -26,4 +26,10 @@ Contact: Guillaume.Huard@imag.fr
 
 int arm_step(arm_core p);
 
+/*
+	Entrée : un arm_core p, une instruction encodée sur 32 bits
+	Sortie : 1 si la condition de l'instruction est respectée, 0 sinon (si 0 alors l'instruction ne devra pas être exécutée)
+*/
+int inst_cond(arm_core p, uint32_t ins);
+
 #endif
