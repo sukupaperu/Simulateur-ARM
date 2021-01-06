@@ -44,12 +44,10 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 
 	// bit S (indique si l'instruction doit mettre à jour les flags NZCV)
 	uint32_t ins_S = get_bit(ins, 20);
-	if (ins_S == 1) {
-		uint32_t flag_N = 0;
-		uint32_t flag_Z = 0;
-		uint32_t flag_V = 0;
-		uint32_t flag_C = 0;
-	}
+	uint32_t flag_N = 0;
+	uint32_t flag_Z = 0;
+	uint32_t flag_V = 0;
+	uint32_t flag_C = 0;
 	// Rn, sur 4 bits, représente le registre source (première opérande)
 	uint32_t ins_rn = (uint8_t) (ins >> 16) & 0xf;
 
@@ -61,9 +59,10 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 
 	// shifter operand, sur 12 bits, représente soit une valeur immédiate soit un registre, sert de seconde opérande
 	// 1 valeur immédiate
+	uint32_t ins_shifter;
 	if (ins_I == 1) {
 		uint8_t rotation = ((ins >> 8) && 0xf) * 2;
-		uint32_t ins_shifter = ror(ins & 0xff,rotation);
+		ins_shifter = ror(ins & 0xff,rotation);
 
 		if ((ins >> 8) && 0xf != 0) {
 			shifter_carry_out = get_bit(ins_shifter, 31);
@@ -81,14 +80,14 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			ins_shifter = rm;
 
 		// 3 logical shift left by immediate
-		} else if (shifter_code & 0x7 == 0x0) {
+		} else if ((shifter_code & 0x7) == 0x0) {
 			ins_shifter = rm << shifter_value;
 			if (shifter_value > 0) {
 				shifter_carry_out = get_bit(rm, 32 - shifter_value);
 			}
 
 		// 4 logical shift left by register
-		} else if (shifter_code & 0xf == 1) {
+		} else if ((shifter_code & 0xf) == 1) {
 			rs = arm_read_register(p, shifter_value >> 1) & 0xff;
 			if (rs == 0) {
 				ins_shifter = rm;
@@ -104,7 +103,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			}
 		
 		// 5 logical shift right by immediate
-		} else if (shifter_code & 0x7 == 0x2) {
+		} else if ((shifter_code & 0x7) == 0x2) {
 			if (shifter_value == 0) {
 				ins_shifter = 0;
 				shifter_carry_out = get_bit(rm, 31);
@@ -114,7 +113,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			}
 
 		// 6 logical shift right by register
-		} else if (shifter_code & 0xf == 0x3) {
+		} else if ((shifter_code & 0xf) == 0x3) {
 			rs = arm_read_register(p, shifter_value >> 1) & 0xff;
 			if (rs == 0) {
 				ins_shifter = rm;
@@ -123,14 +122,14 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 				shifter_carry_out = get_bit(rm, rs - 1);
 			} else if (rs == 32) {
 				ins_shifter = 0;
-				shifter_carry_out = get_bit(rm, 31)
+				shifter_carry_out = get_bit(rm, 31);
 			} else {
 				ins_shifter = 0;
 				shifter_carry_out = 0;
 			}
 
 		// 7 arithmetic shift right by immediate
-		} else if (shifter_code & 0x7 == 0x4) {
+		} else if ((shifter_code & 0x7) == 0x4) {
 			if (shifter_value == 0) {
 				if (get_bit(rm, 31) == 0) {
 					ins_shifter = 0;
@@ -138,14 +137,14 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 				} else {
 					ins_shifter = 0xffffffff;
 					shifter_carry_out = 1;
-				} else {
+				} /*else { // TODO
 					ins_shifter = asr(rm, shifter_value);
 					shifter_carry_out = get_bit(rm, shifter_value - 1);
-				}
+				}*/
 			}
 
 		// 8 arithmetic shift right by register
-		} else if (shifter_code & 0xf == 0x5) {
+		} else if ((shifter_code & 0xf) == 0x5) {
 			rs = arm_read_register(p, shifter_value >> 1) & 0xff;
 			if (rs == 0) {
 				ins_shifter = rm;
@@ -163,7 +162,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			}
 
 		// 9 rotate right by immediate
-		} else if (shifter_code & 0x7 == 0x6) {
+		} else if ((shifter_code & 0x7) == 0x6) {
 			if (shifter_value == 0) {
 				// todo rrx
 			} else {
@@ -172,11 +171,11 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			}
 
 		// 10 rotate right by register
-		} else if (shifter_code & 0xf == 0x7) {
+		} else if ((shifter_code & 0xf) == 0x7) {
 			rs = arm_read_register(p, shifter_value >> 1) & 0xff;
 			if (rs == 0) {
 				ins_shifter = rm;
-			} else if (rs & 0xf == 0) {
+			} else if ((rs & 0xf) == 0) {
 				ins_shifter = rm;
 				shifter_carry_out = get_bit(rm, 31);
 			} else {
@@ -375,7 +374,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			
 
 		// TST test de deux valeurs page 380
-		case 0x8:
+		case 0x8: {
 			uint32_t alu_out = arm_read_register(p, ins_rn) & ins_shifter;
 			
 			flag_N = get_bit(alu_out, 31) << N;
@@ -387,10 +386,11 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
 			arm_write_cpsr(p, flag_N);
 			break;
+		}
 			
 
 		// TEQ test d'équivalence page 378
-		case 0x9:
+		case 0x9: {
 			uint32_t alu_out = arm_read_register(p, ins_rn) ^ ins_shifter;
 			
 			flag_N = get_bit(alu_out, 31) << N;
@@ -402,10 +402,11 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
 			arm_write_cpsr(p, flag_N);
 			break;
+		}
 			
 
 		// CMP comparaison page 178
-		case 0xa:
+		case 0xa: {
 			uint32_t alu_out = arm_read_register(p, ins_rn) - ins_shifter;
 			
 			flag_N = get_bit(alu_out, 31) << N;
@@ -417,10 +418,11 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
 			arm_write_cpsr(p, flag_N);
 			break;
+		}
 			
 
 		// CMN comparaison en complément à deux page 176
-		case 0xb:
+		case 0xb: {
 			uint32_t alu_out = arm_read_register(p, ins_rn) + ins_shifter;
 			
 			flag_N = get_bit(alu_out, 31) << N;
@@ -432,6 +434,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
 			arm_write_cpsr(p, flag_N);
 			break;
+		}
 			
 
 		// ORR ou logique page 234
