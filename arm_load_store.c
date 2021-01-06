@@ -41,6 +41,7 @@ int arm_load_store(arm_core p, uint32_t ins) {
     int is_pre_indexed_or_offset_addressing_mode = get_bit(ins, 24);
     // bit w, si la variable précédente vaut 1 alors is_w_bit_set vaudra 1 si on est mode "pre-indexed addressing"
     // (dans le  cas inverse c'est que l'on est mode "offset addressing")
+    // (ce bit est généralement associé à la mise à jour du contenu du registre contenant l'adresse mémoire)
     int is_w_bit_set = get_bit(ins, 21);
     // bit l (usage variable)
     int is_l_bit_set = get_bit(ins, 20);
@@ -50,6 +51,10 @@ int arm_load_store(arm_core p, uint32_t ins) {
     uint32_t offset;
     // adresse de base (adresse mémoire à laquelle aura lieu l'accès en lecture/écriture)
     uint32_t address = arm_read_register(p, rn_register);
+    if(rn_register == 15)
+        address = arm_read_register(p, rn_register) + 8;
+    else
+        address = arm_read_register(p, rn_register);
     // résultat de l'opération d'accès mémoire (vaut 0 si succès, sinon -1)
     int access_result;
 
@@ -68,6 +73,8 @@ int arm_load_store(arm_core p, uint32_t ins) {
             // Rm, sur 4 bits, registre contenant la valeur de initiale l'offset
             uint8_t rm_register = get_bits(ins, 3, 0);
             // valeur initiale de l'offset
+            // if(rm_register == 15) -> UNPREDICTABLE
+            // if(rn_register == rm_register) -> UNPREDICTABLE
             uint32_t rm_register_value = arm_read_register(p, rm_register);
             // sur 3 bits, code de l'opérateur de décalage à appliquer à la valeur d'offset
             uint8_t shift_operator = get_bits(ins, 6, 5);
@@ -93,7 +100,7 @@ int arm_load_store(arm_core p, uint32_t ins) {
                     // cas spécial : si la valeur de rotation vaut 0, on applique une rotation étendue de 1 vers la droite (RRX)
                     if(shift_immediate_value == 0) {
                         // bit de retenue sortante
-                        int carry_flag = get_bit(arm_read_cpsr(p), 29);
+                        int carry_flag = get_bit(arm_read_cpsr(p), C);
 
                         offset = ((carry_flag << 31) | (rm_register_value > 1));
                     } else {
@@ -116,6 +123,7 @@ int arm_load_store(arm_core p, uint32_t ins) {
             address += is_offset_added ? offset : -offset;
             if(is_w_bit_set)
                 // on réécrit au registre associé la nouvelle adresse par dessus l'ancienne
+                // if(rn_register == 15) -> UNPREDICTABLE
                 arm_write_register(p, rn_register, address);
         }
 
@@ -156,6 +164,7 @@ int arm_load_store(arm_core p, uint32_t ins) {
             // on applique l'offset à l'adresse mémoire
             address += is_offset_added ? offset : -offset;
             // on réécrit au registre associé la nouvelle adresse par dessus l'ancienne
+            // if(rn_register == 15) -> UNPREDICTABLE
             arm_write_register(p, rn_register, address);
         }
     } else {
@@ -189,6 +198,8 @@ int arm_load_store(arm_core p, uint32_t ins) {
                 // Rm, sur 4 bits, registre contenant la valeur de l'offset à appliquer à l'adresse
                 uint8_t rm_register = get_bits(ins, 3, 0);
                 // valeur de l'offset à appliquer à l'adresse
+                // if(rm_register == 15) -> UNPREDICTABLE
+                // if(rn_register == rm_register) -> UNPREDICTABLE
                 uint32_t rm_register_value = arm_read_register(p, rm_register);
 
                 offset = rm_register_value;
@@ -199,6 +210,7 @@ int arm_load_store(arm_core p, uint32_t ins) {
                 address += is_offset_added ? offset : -offset;
                 if(is_w_bit_set)
                     // on réécrit au registre associé la nouvelle adresse par dessus l'ancienne
+                    // if(rn_register == 15) -> UNPREDICTABLE
                     arm_write_register(p, rn_register, address);
             }
 
@@ -243,6 +255,7 @@ int arm_load_store(arm_core p, uint32_t ins) {
                 // on applique l'offset à l'adresse mémoire
                 address += is_offset_added ? offset : -offset;
                 // on réécrit au registre associé la nouvelle adresse par dessus l'ancienne
+                // if(rn_register == 15) -> UNPREDICTABLE
                 arm_write_register(p, rn_register, address);
             }
         } else { // se produit si l'instruction n'est pas reconnue comme une instruction d'accès mémoire
