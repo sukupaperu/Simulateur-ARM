@@ -55,6 +55,7 @@ int arm_load_store(arm_core p, uint32_t ins) {
         address = arm_read_register(p, rn_register) + 8;
     else
         address = arm_read_register(p, rn_register);
+
     // résultat de l'opération d'accès mémoire (vaut 0 si succès, sinon -1)
     int access_result;
 
@@ -128,33 +129,35 @@ int arm_load_store(arm_core p, uint32_t ins) {
         }
 
         if(is_load_instruction) { // instruction de lecture
-            // registre dans lequel on va charger la donnée en provenance de la mémoire
             uint8_t destination_register = rd_register;
 
             if(is_unsigned_byte_access) { // instruction LDRB (unsigned byte)
-                // variable de la donnée
                 uint8_t value;
 
                 access_result = arm_read_byte(p, address, &value);
+                if(access_result == -1) // illegal memory access
+                    return DATA_ABORT;
                 arm_write_register(p, destination_register, value);
             } else { // instruction LDR (word)
-                // variable de la donnée
                 uint32_t value;
 
                 access_result = arm_read_word(p, address, &value);
+                if(access_result == -1) // illegal memory access
+                    return DATA_ABORT;
                 arm_write_register(p, destination_register, value);
             }
                 
         } else { // instruction d'écriture
-            // registre depuis lequel on va charger la donnée vers la mémoire
             uint8_t source_register = rd_register;
-            // variable de la donnée
             uint32_t value = arm_read_register(p, source_register);
 
-            if(is_unsigned_byte_access) // instruction STRB (byte)
+            if(is_unsigned_byte_access) // instruction STRB (byte) 
                 access_result = arm_write_byte(p, address, value);
             else // instruction STR (word)
                 access_result = arm_write_word(p, address, value);
+
+            if(access_result == -1) // illegal memory access
+                    return DATA_ABORT;
         }
 
         // si on est en mode "post-indexed addressing"
@@ -216,35 +219,26 @@ int arm_load_store(arm_core p, uint32_t ins) {
 
             switch(access_type) {
                 case 1: { // instruction STRH (halfword)
-                    // registre depuis lequel on va charger la donnée vers la mémoire
                     uint32_t source_register = rd_register;
-                    // variable de la donnée
                     uint16_t value = arm_read_register(p, source_register);
 
                     access_result = arm_write_half(p, address, value);
+                    if(access_result == -1) // illegal memory access
+                        return DATA_ABORT;
                     break;
                 }
-                case 5: // instruction LDRH (unsigned halfword)
-                case 7: { // instruction LDRH (signed halfword)
-                    // registre dans lequel on va charger la donnée en provenance de la mémoire
+                case 5: { // instruction LDRH (unsigned halfword)
                     uint8_t destination_register = rd_register;
-                    // variable de la donnée
                     uint16_t value;
                     
                     access_result =  arm_read_half(p, address, &value);
+                    if(access_result == -1) // illegal memory access
+                        return DATA_ABORT;
                     arm_write_register(p, destination_register, value);
                     break;
                 }
-                case 6: { // instruction LDRB (signed byte)
-                    // registre dans lequel on va charger la donnée en provenance de la mémoire
-                    uint8_t destination_register = rd_register;
-                    // variable de la donnée
-                    uint8_t value;
-
-                    access_result = arm_read_byte(p, address, &value);
-                    arm_write_register(p, destination_register, value);
-                    break;
-                }
+                case 7: // instruction LDRSH (signed halfword)
+                case 6: // instruction LDSRB (signed byte)
                 default: // se produit si l'instruction n'est pas reconnue comme une instruction d'accès mémoire connue
                     return UNDEFINED_INSTRUCTION;
             }
@@ -263,17 +257,85 @@ int arm_load_store(arm_core p, uint32_t ins) {
         }
     }
 
-    if(access_result == -1) // se produit si l'accès à la donnée en mémoire a échoué
-        return DATA_ABORT;
-
     return 0;
 }
 
 int arm_load_store_multiple(arm_core p, uint32_t ins) {
-    return UNDEFINED_INSTRUCTION;
-}
+    /*
+        On isole les parties de l'instruction qui nous intéressent pour la suite du décodage.
+    */
+    
+    // Rn, sur 4 bits, registre contenant l'adresse mémoire à partir de laquelle aura lieu les accès en lecture/écriture
+    uint8_t rn_register = get_bits(ins, 19, 16);
+    // sur 16 bits, liste des registres qui vont être transférés (bit 0 = r0, bit 1 = r1 ... bit 15 = r15)
+    uint16_t register_list = get_bits(ins, 15, 0);
+    // vaut 1 si l'accès mémoire est un accès en lecture (accès en écriture dans le cas contraire)
+    int is_load_instruction = get_bit(ins, 20);
+    // bit s
+    int is_s_bit_set = get_bit(ins, 22);
+    // bit p
+    // int is_p_bit_set = get_bit(ins, 24);
+    // bit u
+    // int is_u_bit_set = get_bit(ins, 23);
+    // bit w
+    // int is_w_bit_set = get_bit(ins, 21);
 
-int arm_coprocessor_load_store(arm_core p, uint32_t ins) {
-    /* Non implémenté */
-    return UNDEFINED_INSTRUCTION;
+    // l'adresse mémoire à partir de laquelle aura lieu les accès en lecture/écriture
+    uint32_t address = arm_read_register(p, rn_register);
+
+    // résultat de l'opération d'accès mémoire (vaut 0 si succès, sinon -1)
+    int access_result;
+
+    if(!is_s_bit_set) { // prérequis pour les instructions LDM(1) et STM(1)
+        if(is_load_instruction) { // instruction LDM(1)
+            
+            for(int r = 0; r <= 14; r++) {
+                if(get_bit(register_list, r) == 1) {
+                    uint32_t value;
+
+                    access_result = arm_read_word(p, address, &value);
+                    if(access_result == -1) // illegal memory access
+                        return DATA_ABORT;
+                    address += 4;
+
+                    arm_write_register(p, r, value);
+                }
+            }
+
+            if(get_bit(register_list, 15) == 1) {
+                uint32_t value;
+
+                access_result = arm_read_word(p, address, &value);
+                if(access_result == -1) // illegal memory access
+                    return DATA_ABORT;
+                
+                arm_write_register(p, 15, value & 0xfffffffe);
+
+                uint32_t cpsr_value = arm_read_register(p, 16);
+                if(get_bit(value, 0) == 1)
+                    cpsr_value = set_bit(cpsr_value, 0);
+                else
+                    cpsr_value = clr_bit(cpsr_value, 0);
+                arm_write_register(p, 16, cpsr_value);
+            }
+
+        } else { // instruction STM(1)
+
+            for(int r = 0; r <= 15; r++) {
+                if(get_bit(register_list, r) == 1) {
+                    uint32_t value = arm_read_register(p, r);
+
+                    access_result = arm_write_word(p, address, value);
+                    if(access_result == -1) // illegal memory access
+                        return DATA_ABORT;
+                    address += 4;
+                }
+            }
+
+        }
+    } else { // se produit si l'instruction n'est pas reconnue comme une instruction d'accès mémoire connue
+        return UNDEFINED_INSTRUCTION;
+    }
+
+    return 0;
 }
