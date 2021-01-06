@@ -39,10 +39,8 @@ int arm_load_store(arm_core p, uint32_t ins) {
     int is_offset_added = get_bit(ins, 23);
     // vaut 1 si on est en mode "pre-indexed addressing" ou "offset addressing"
     int is_pre_indexed_or_offset_addressing_mode = get_bit(ins, 24);
-    // bit w, si la variable précédente vaut 1 alors is_w_bit_set vaudra 1 si on est mode "pre-indexed addressing"
-    // (dans le  cas inverse c'est que l'on est mode "offset addressing")
-    // (ce bit est généralement associé à la mise à jour du contenu du registre contenant l'adresse mémoire)
-    int is_w_bit_set = get_bit(ins, 21);
+    // vaut 1, si la mise à jour du contenu du registre contenant l'adresse mémoire est activée
+    int is_writeback_mode = get_bit(ins, 21);
     // bit l (usage variable)
     int is_l_bit_set = get_bit(ins, 20);
 
@@ -55,9 +53,6 @@ int arm_load_store(arm_core p, uint32_t ins) {
         address = arm_read_register(p, rn_register) + 8;
     else
         address = arm_read_register(p, rn_register);
-
-    // résultat de l'opération d'accès mémoire (vaut 0 si succès, sinon -1)
-    int access_result;
 
     // vaut 1 si on l'accès mémoire concerne un mot (32bits) ou bien un octet non signé
     int is_word_or_unsigned_byte_access = get_bits(ins, 27, 26) == 0b01;
@@ -122,7 +117,7 @@ int arm_load_store(arm_core p, uint32_t ins) {
         if(is_pre_indexed_or_offset_addressing_mode) {
             // on applique l'offset à l'adresse mémoire
             address += is_offset_added ? offset : -offset;
-            if(is_w_bit_set)
+            if(is_writeback_mode)
                 // on réécrit au registre associé la nouvelle adresse par dessus l'ancienne
                 // if(rn_register == 15) -> UNPREDICTABLE
                 arm_write_register(p, rn_register, address);
@@ -134,14 +129,14 @@ int arm_load_store(arm_core p, uint32_t ins) {
             if(is_unsigned_byte_access) { // instruction LDRB (unsigned byte)
                 uint8_t value;
 
-                access_result = arm_read_byte(p, address, &value);
+                int access_result = arm_read_byte(p, address, &value);
                 if(access_result == -1) // illegal memory access
                     return DATA_ABORT;
                 arm_write_register(p, destination_register, value);
             } else { // instruction LDR (word)
                 uint32_t value;
 
-                access_result = arm_read_word(p, address, &value);
+                int access_result = arm_read_word(p, address, &value);
                 if(access_result == -1) // illegal memory access
                     return DATA_ABORT;
                 arm_write_register(p, destination_register, value);
@@ -150,6 +145,7 @@ int arm_load_store(arm_core p, uint32_t ins) {
         } else { // instruction d'écriture
             uint8_t source_register = rd_register;
             uint32_t value = arm_read_register(p, source_register);
+            int access_result;
 
             if(is_unsigned_byte_access) // instruction STRB (byte) 
                 access_result = arm_write_byte(p, address, value);
@@ -162,7 +158,7 @@ int arm_load_store(arm_core p, uint32_t ins) {
 
         // si on est en mode "post-indexed addressing"
         if(!is_pre_indexed_or_offset_addressing_mode) {
-            if(is_w_bit_set) // se produit si l'instruction est LDRBT, LDRT, STRBT ou STRT (non implémentées)
+            if(is_writeback_mode) // se produit si l'instruction est LDRBT, LDRT, STRBT ou STRT (non implémentées)
                 return UNDEFINED_INSTRUCTION;
             // on applique l'offset à l'adresse mémoire
             address += is_offset_added ? offset : -offset;
@@ -211,7 +207,7 @@ int arm_load_store(arm_core p, uint32_t ins) {
             if(is_pre_indexed_or_offset_addressing_mode) {
                 // on applique l'offset à l'adresse mémoire
                 address += is_offset_added ? offset : -offset;
-                if(is_w_bit_set)
+                if(is_writeback_mode)
                     // on réécrit au registre associé la nouvelle adresse par dessus l'ancienne
                     // if(rn_register == 15) -> UNPREDICTABLE
                     arm_write_register(p, rn_register, address);
@@ -222,7 +218,7 @@ int arm_load_store(arm_core p, uint32_t ins) {
                     uint32_t source_register = rd_register;
                     uint16_t value = arm_read_register(p, source_register);
 
-                    access_result = arm_write_half(p, address, value);
+                    int access_result = arm_write_half(p, address, value);
                     if(access_result == -1) // illegal memory access
                         return DATA_ABORT;
                     break;
@@ -231,7 +227,7 @@ int arm_load_store(arm_core p, uint32_t ins) {
                     uint8_t destination_register = rd_register;
                     uint16_t value;
                     
-                    access_result =  arm_read_half(p, address, &value);
+                    int access_result =  arm_read_half(p, address, &value);
                     if(access_result == -1) // illegal memory access
                         return DATA_ABORT;
                     arm_write_register(p, destination_register, value);
@@ -245,7 +241,7 @@ int arm_load_store(arm_core p, uint32_t ins) {
 
             // si on est en mode "post-indexed addressing"
             if(!is_pre_indexed_or_offset_addressing_mode) {
-                // if(is_w_bit_set) -> UNPREDICTABLE
+                // if(is_writeback_mode) -> UNPREDICTABLE
                 // on applique l'offset à l'adresse mémoire
                 address += is_offset_added ? offset : -offset;
                 // on réécrit au registre associé la nouvelle adresse par dessus l'ancienne
@@ -274,17 +270,16 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
     // bit s
     int is_s_bit_set = get_bit(ins, 22);
     // bit p
-    // int is_p_bit_set = get_bit(ins, 24);
-    // bit u
-    // int is_u_bit_set = get_bit(ins, 23);
-    // bit w
-    // int is_w_bit_set = get_bit(ins, 21);
+    int is_p_bit_set = get_bit(ins, 24);
+    // bit u, vaut 1 si le transfert est ascendant par rapport à l'adresse de base (descendant dans le cas contraire)
+    int is_upwards_transfert = get_bit(ins, 23);
+    // bit w, vaut 1 si la mise à jour du contenu du registre contenant l'adresse mémoire est activée
+    int is_writeback_mode = get_bit(ins, 21);
 
     // l'adresse mémoire à partir de laquelle aura lieu les accès en lecture/écriture
     uint32_t address = arm_read_register(p, rn_register);
-
-    // résultat de l'opération d'accès mémoire (vaut 0 si succès, sinon -1)
-    int access_result;
+    if(is_p_bit_set)
+        address += is_upwards_transfert ? 4 : -4;
 
     if(!is_s_bit_set) { // prérequis pour les instructions LDM(1) et STM(1)
         if(is_load_instruction) { // instruction LDM(1)
@@ -293,10 +288,10 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
                 if(get_bit(register_list, r) == 1) {
                     uint32_t value;
 
-                    access_result = arm_read_word(p, address, &value);
+                    int access_result = arm_read_word(p, address, &value);
                     if(access_result == -1) // illegal memory access
                         return DATA_ABORT;
-                    address += 4;
+                    address += is_upwards_transfert ? 4 : -4;
 
                     arm_write_register(p, r, value);
                 }
@@ -305,9 +300,10 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
             if(get_bit(register_list, 15) == 1) {
                 uint32_t value;
 
-                access_result = arm_read_word(p, address, &value);
+                int access_result = arm_read_word(p, address, &value);
                 if(access_result == -1) // illegal memory access
                     return DATA_ABORT;
+                address += is_upwards_transfert ? 4 : -4;
                 
                 arm_write_register(p, 15, value & 0xfffffffe);
 
@@ -325,10 +321,10 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
                 if(get_bit(register_list, r) == 1) {
                     uint32_t value = arm_read_register(p, r);
 
-                    access_result = arm_write_word(p, address, value);
+                    int access_result = arm_write_word(p, address, value);
                     if(access_result == -1) // illegal memory access
                         return DATA_ABORT;
-                    address += 4;
+                    address += is_upwards_transfert ? 4 : -4;
                 }
             }
 
@@ -336,6 +332,9 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
     } else { // se produit si l'instruction n'est pas reconnue comme une instruction d'accès mémoire connue
         return UNDEFINED_INSTRUCTION;
     }
+
+    if(is_writeback_mode)
+        arm_write_register(p, rn_register, address);
 
     return 0;
 }
