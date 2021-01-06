@@ -25,7 +25,21 @@ Contact: Guillaume.Huard@imag.fr
 #include <stdint.h>
 #include "arm_core.h"
 
+/*
+	Le module arm_data_processing va permettre l'exécution des instructions suivantes :
+	AND, EOR, SUB, RSB, ADD, ADC, SBC, RSC, TST,TEQ, CMP, CMN, ORR, MOV, BIC, MVN
+	Ses fonctions sont appelées par arm_instruction qui se charge des premières étapes du décodage
+*/
+
+/*
+	Entrée : un arm_core p, un uint32_t correspondant à l'instruction binaire
+	Sortie : 0 si l'instruction se termine correctement, un code d'erreur (voir arm_constants.h) sinon
+*/
 int arm_data_processing_shift(arm_core p, uint32_t ins);
+
+/*
+	Non implémentée pour le moment, renvoie toujours UNDEFINED_INSTRUCTION
+*/
 int arm_data_processing_immediate_msr(arm_core p, uint32_t ins);
 
 #endif
