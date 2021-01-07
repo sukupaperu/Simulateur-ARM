@@ -32,7 +32,6 @@ Contact: Guillaume.Huard@imag.fr
 static int arm_execute_instruction(arm_core p) {
     int res = 0;
     uint32_t opcode;
-    uint32_t *tmp;
     res = arm_fetch(p,&opcode);
 
     if(!inst_cond( p, opcode)){
