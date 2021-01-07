@@ -338,3 +338,8 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 
     return 0;
 }
+
+int arm_coprocessor_load_store(arm_core p, uint32_t ins) {
+    /* Non implémenté */
+    return UNDEFINED_INSTRUCTION;
+}
