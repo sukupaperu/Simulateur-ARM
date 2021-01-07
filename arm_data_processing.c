@@ -137,10 +137,10 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 				} else {
 					ins_shifter = 0xffffffff;
 					shifter_carry_out = 1;
-				} /*else { // TODO
-					ins_shifter = asr(rm, shifter_value);
-					shifter_carry_out = get_bit(rm, shifter_value - 1);
-				}*/
+				}
+			} else {
+				ins_shifter = asr(rm, shifter_value);
+				shifter_carry_out = get_bit(rm, shifter_value - 1);
 			}
 
 		// 8 arithmetic shift right by register
