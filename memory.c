@@ -92,18 +92,16 @@ int memory_read_word(memory mem, uint32_t address, uint32_t *value) {
     // si l'adresse n'est pas align�e sur un word ou que l'on s�lectionne une adresse en dehors de l'espace adressable
     if(get_bits(address, 1, 0) != 0 || address + 3 > mem->size)
         return -1;
+    
+    *value = 0;
 
     // en fonction du type de boutisme de mem
     if(mem->is_big_endian_type)
-        *value = (mem->data[address] << 24) 
-            | (mem->data[address + 1] << 16) 
-            | (mem->data[address + 2] << 8) 
-            | mem->data[address + 3];
+		for(int i = 0; i < 4; i++)
+            *value |= (mem->data[address + i] << (24 - i*8));
     else
-        *value = (mem->data[address + 3] << 24) 
-            | (mem->data[address + 2] << 16) 
-            | (mem->data[address + 1] << 8) 
-            | mem->data[address];
+		for(int i = 0; i < 4; i++)
+            *value |= (mem->data[address + (3 - i)] << (24 - i*8));
 
     return 0;
 }
@@ -141,21 +139,12 @@ int memory_write_word(memory mem, uint32_t address, uint32_t value) {
         return -1;
 
     // en fonction du type de boutisme de mem
-    if(mem->is_big_endian_type) {
-		for(int i=0;i<4;i++)
+    if(mem->is_big_endian_type)
+		for(int i = 0; i < 4; i++)
 			mem->data[address + i] = value >> (24 - i*8);
-	//	mem->data[address] = value >> 24;
-	//	mem->data[address + 1] = value >> 16;
-	//	mem->data[address + 2] = value >> 8;
-	//	mem->data[address + 3] = value;
-	} else {
-		for(int i=0;i<4;i++)
-			mem->data[address + (3-i)] = value >> (24 - i*8);
-	//	mem->data[address + 3] = value >> 24;
-	//	mem->data[address + 2] = value >> 16;
-	//	mem->data[address + 1] = value >> 8;
-	//	mem->data[address] = value;
-	}
+    else
+		for(int i = 0; i < 4; i++)
+			mem->data[address + (3 - i)] = value >> (24 - i*8);
 
 	return 0;
 }
