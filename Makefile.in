@@ -87,7 +87,7 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 bin_PROGRAMS = arm_simulator$(EXEEXT) send_irq$(EXEEXT) \
-	memory_test$(EXEEXT)
+	memory_test$(EXEEXT) registers_test$(EXEEXT)
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -119,6 +119,11 @@ am_memory_test_OBJECTS = memory_test.$(OBJEXT) memory.$(OBJEXT) \
 memory_test_OBJECTS = $(am_memory_test_OBJECTS)
 memory_test_LDADD = $(LDADD)
 memory_test_DEPENDENCIES =
+am_registers_test_OBJECTS = registers_test.$(OBJEXT) \
+	registers.$(OBJEXT) util.$(OBJEXT) arm_constants.$(OBJEXT)
+registers_test_OBJECTS = $(am_registers_test_OBJECTS)
+registers_test_LDADD = $(LDADD)
+registers_test_DEPENDENCIES =
 am_send_irq_OBJECTS = send_irq.$(OBJEXT) csapp.$(OBJEXT) \
 	arm_constants.$(OBJEXT)
 send_irq_OBJECTS = $(am_send_irq_OBJECTS)
@@ -147,8 +152,9 @@ am__depfiles_remade = ./$(DEPDIR)/arm.Po \
 	./$(DEPDIR)/csapp.Po ./$(DEPDIR)/debug.Po \
 	./$(DEPDIR)/gdb_protocol.Po ./$(DEPDIR)/memory.Po \
 	./$(DEPDIR)/memory_test.Po ./$(DEPDIR)/registers.Po \
-	./$(DEPDIR)/scanner.Po ./$(DEPDIR)/send_irq.Po \
-	./$(DEPDIR)/trace.Po ./$(DEPDIR)/util.Po
+	./$(DEPDIR)/registers_test.Po ./$(DEPDIR)/scanner.Po \
+	./$(DEPDIR)/send_irq.Po ./$(DEPDIR)/trace.Po \
+	./$(DEPDIR)/util.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -169,9 +175,9 @@ am__v_LEX_0 = @echo "  LEX     " $@;
 am__v_LEX_1 = 
 YLWRAP = $(top_srcdir)/build-aux/ylwrap
 SOURCES = $(arm_simulator_SOURCES) $(memory_test_SOURCES) \
-	$(send_irq_SOURCES)
+	$(registers_test_SOURCES) $(send_irq_SOURCES)
 DIST_SOURCES = $(arm_simulator_SOURCES) $(memory_test_SOURCES) \
-	$(send_irq_SOURCES)
+	$(registers_test_SOURCES) $(send_irq_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
 	install-data-recursive install-dvi-recursive \
@@ -220,7 +226,7 @@ am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in \
 	$(top_srcdir)/build-aux/depcomp \
 	$(top_srcdir)/build-aux/install-sh \
 	$(top_srcdir)/build-aux/missing $(top_srcdir)/build-aux/ylwrap \
-	AUTHORS COPYING ChangeLog INSTALL README build-aux/compile \
+	AUTHORS COPYING ChangeLog INSTALL build-aux/compile \
 	build-aux/depcomp build-aux/install-sh build-aux/missing \
 	build-aux/ylwrap scanner.c
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -384,6 +390,7 @@ COMMON = csapp.h csapp.c scanner.h scanner.l debug.h debug.c \
 arm_simulator_SOURCES = $(COMMON) arm_simulator.c
 send_irq_SOURCES = send_irq.c csapp.h csapp.c arm_constants.h arm_constants.c
 memory_test_SOURCES = memory_test.c memory.h memory.c util.h util.c
+registers_test_SOURCES = registers_test.c registers.h registers.c util.h util.c arm_constants.h arm_constants.c
 EXTRA_DIST = gdb_commands make_trace.sh License
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
@@ -489,6 +496,10 @@ memory_test$(EXEEXT): $(memory_test_OBJECTS) $(memory_test_DEPENDENCIES) $(EXTRA
 	@rm -f memory_test$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(memory_test_OBJECTS) $(memory_test_LDADD) $(LIBS)
 
+registers_test$(EXEEXT): $(registers_test_OBJECTS) $(registers_test_DEPENDENCIES) $(EXTRA_registers_test_DEPENDENCIES) 
+	@rm -f registers_test$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(registers_test_OBJECTS) $(registers_test_LDADD) $(LIBS)
+
 send_irq$(EXEEXT): $(send_irq_OBJECTS) $(send_irq_DEPENDENCIES) $(EXTRA_send_irq_DEPENDENCIES) 
 	@rm -f send_irq$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(send_irq_OBJECTS) $(send_irq_LDADD) $(LIBS)
@@ -514,6 +525,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/memory.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/memory_test.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/registers.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/registers_test.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/scanner.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/send_irq.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trace.Po@am__quote@ # am--include-marker
@@ -899,6 +911,7 @@ distclean: distclean-recursive
 	-rm -f ./$(DEPDIR)/memory.Po
 	-rm -f ./$(DEPDIR)/memory_test.Po
 	-rm -f ./$(DEPDIR)/registers.Po
+	-rm -f ./$(DEPDIR)/registers_test.Po
 	-rm -f ./$(DEPDIR)/scanner.Po
 	-rm -f ./$(DEPDIR)/send_irq.Po
 	-rm -f ./$(DEPDIR)/trace.Po
@@ -965,6 +978,7 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f ./$(DEPDIR)/memory.Po
 	-rm -f ./$(DEPDIR)/memory_test.Po
 	-rm -f ./$(DEPDIR)/registers.Po
+	-rm -f ./$(DEPDIR)/registers_test.Po
 	-rm -f ./$(DEPDIR)/scanner.Po
 	-rm -f ./$(DEPDIR)/send_irq.Po
 	-rm -f ./$(DEPDIR)/trace.Po

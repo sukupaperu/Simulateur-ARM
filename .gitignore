@@ -5,6 +5,7 @@
 .deps
 
 Makefile
+Makefile.in
 
 stamp-h1
 config.h
@@ -13,9 +14,11 @@ config.status
 
 arm_simulator
 memory_test
+registers_test
 send_irq
 
 Examples/example[0-9]
+autom4te.cache
 
 *.stackdump
 *.gch
