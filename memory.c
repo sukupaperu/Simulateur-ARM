@@ -142,16 +142,20 @@ int memory_write_word(memory mem, uint32_t address, uint32_t value) {
 
     // en fonction du type de boutisme de mem
     if(mem->is_big_endian_type) {
-        mem->data[address] = value >> 24;
-        mem->data[address + 1] = value >> 16;
-        mem->data[address + 2] = value >> 8;
-        mem->data[address + 3] = value;
-    } else {
-        mem->data[address + 3] = value >> 24;
-        mem->data[address + 2] = value >> 16;
-        mem->data[address + 1] = value >> 8;
-        mem->data[address] = value;
-    }
+		for(int i=0;i<4;i++)
+			mem->data[address + i] = value >> (24 - i*8);
+	//	mem->data[address] = value >> 24;
+	//	mem->data[address + 1] = value >> 16;
+	//	mem->data[address + 2] = value >> 8;
+	//	mem->data[address + 3] = value;
+	} else {
+		for(int i=0;i<4;i++)
+			mem->data[address + (3-i)] = value >> (24 - i*8);
+	//	mem->data[address + 3] = value >> 24;
+	//	mem->data[address + 2] = value >> 16;
+	//	mem->data[address + 1] = value >> 8;
+	//	mem->data[address] = value;
+	}
 
-    return 0;
+	return 0;
 }
