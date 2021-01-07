@@ -28,8 +28,89 @@ Contact: Guillaume.Huard@imag.fr
 #include "arm_constants.h"
 #include "util.h"
 
+
 static int arm_execute_instruction(arm_core p) {
-    return 0;
+    int res = 0;
+    uint32_t opcode;
+    uint32_t *tmp;
+    res = arm_fetch(p,&opcode);
+
+    if(!inst_cond( p, opcode)){
+        
+        //------arm_load_store 
+        /* LDH et STRH : 
+         *  opcode[27:25] == 0b000
+         *  opcode[7] == 1
+         *  opcode[4] == 1
+         *  opcode[24] != 0
+         *  opcode[6:5] != 0
+         */
+        if(get_bits(opcode, 27,25)==0 && get_bit(opcode, 7)== 1 &&
+           get_bit(opcode, 4)==1 && get_bit(opcode, 24)!=0 && get_bits(opcode, 6,5)!=0){
+            res=arm_load_store( p, opcode);
+        }
+        /* LDR, LDRB, STR et STRB : 
+        * opcode[27:25] == 0b010 
+        * or opcode[27:25] == 0b011 , opcode[4] == 0
+        */
+        else if((get_bits(opcode, 27,25)==0b010) || (get_bits(opcode, 27,25)==0b011 && get_bit(opcode, 4)==0)){
+            res=arm_load_store( p, opcode);
+        }
+        /*LDM et STM :
+        * opcode[27:25] == 0b100
+        */
+        else if(get_bits(opcode, 27,25)==0b100){
+            res=arm_load_store_multiple( p, opcode);
+        }
+
+        //------arm_data_processing
+        /*
+        * B/BL:  opcode[27:25] == 0b101
+        */
+        else if(get_bits(opcode, 27,25)==0b101){
+            res=arm_data_processing_shift(p, opcode);
+        }
+        /*
+        * AND, EOR, SUB, RSB, ADD, ADC, SBC, RSC, 
+        * TST, TEQ, CMP, CMN, ORR, MOV, BIC, MVN
+        * opcode[27:26] == 0b00
+        * opcode[24:21] = [0000,1111]
+        * 
+        * STR, LDR, STRB, LDRB :
+        * opcode[27:26] == 0b00
+        * opcode[22], [20] = [00,11]
+        */
+        else if(get_bits(opcode, 27,26)==0b00){
+            res=arm_data_processing_shift(p, opcode);
+        }
+        /*
+        * LDRH, STRH
+        * opcode[27:25] == 0b000
+        * opcode[7:4] == 0b1011
+        * opcode[22] == 1
+        * opcode[20] == 1/0
+        */
+        else if((get_bits(opcode, 27,25)==0b000) && 
+                (get_bits(opcode, 7, 4)==0b1011) && (get_bit(opcode, 22) ==1)){
+            res=arm_data_processing_shift(p, opcode);
+        }
+        /*
+        * LDM, STM
+        * opcode[27:25] == 0b100
+        */
+        else if(get_bits(opcode, 27,25)==0b000){
+            res=arm_data_processing_shift(p, opcode);
+        }
+        /*
+        * MRS
+        * opcode[27:23] == 0b00010
+        * opcode[21:20] == 0b00
+        */
+        else if((get_bits(opcode, 27,23)==0b00010) && (get_bits(opcode, 21,20)==0b00)){
+            res=arm_data_processing_shift(p, opcode);
+        }
+    }
+    return res;
 }
 
 int arm_step(arm_core p) {
@@ -44,6 +125,9 @@ int arm_step(arm_core p) {
 
 int inst_cond(arm_core p, uint32_t ins) {
     uint32_t flags = arm_read_cpsr(p);
+    /*uint8_t reg;
+    arm_read_register( p, reg);
+    uint32_t flags = read_cpsr(reg);*/
 
     uint32_t flag_N = (flags >> N) & 1;
     uint32_t flag_Z = (flags >> Z) & 1;
