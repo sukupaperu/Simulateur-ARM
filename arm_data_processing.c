@@ -164,7 +164,8 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 		// 9 rotate right by immediate
 		} else if ((shifter_code & 0x7) == 0x6) {
 			if (shifter_value == 0) {
-				// todo rrx
+				ins_shifter = (shifter_carry_out << 31) | (rm >> 1);
+				shifter_carry_out = get_bit(rm, 0);
 			} else {
 				ins_shifter = asr(rm, shifter_value);
 				shifter_carry_out = get_bit(rm, shifter_value - 1);
@@ -254,7 +255,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 				flag_N = get_bit(arm_read_register(p, ins_rd), 31) << N;
 				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0) << Z;
 				flag_C = (ins_shifter > arm_read_register(p, ins_rn) ? 0 : 1) << C;
-				// flag_V = OverflowFrom(arm_read_register(p, ins_rn) - ins_shifter) TODO
+				// flag_V = OverflowFrom(arm_read_register(p, ins_rn) - ins_shifter) TODO page 1131
 
 				flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
 				flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
@@ -297,7 +298,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			} else if (ins_S == 1) {
 				flag_N = get_bit(arm_read_register(p, ins_rd), 31) << N;
 				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0) << Z;
-				// flag_C = CarryFrom(arm_read_register(p, ins_rn) + ins_shifter) TODO
+				// flag_C = CarryFrom(arm_read_register(p, ins_rn) + ins_shifter) TODO page 1124
 				// flag_V = OverflowFrom(arm_read_register(p, ins_rn) + ins_shifter) TODO
 
 				flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
@@ -411,7 +412,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			
 			flag_N = get_bit(alu_out, 31) << N;
 			flag_Z = (alu_out == 0 ? 1 : 0) << Z;
-			// flag_C = CarryFrom(arm_read_register(p, ins_rn) - ins_shifter) TODO
+			flag_C = (ins_shifter > arm_read_register(p, ins_rn) ? 0 : 1) << C;
 			// flag_V = OverflowFrom(arm_read_register(p, ins_rn) - ins_shifter) TODO
 			
 			flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
