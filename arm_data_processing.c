@@ -254,8 +254,8 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			} else if (ins_S == 1) {
 				flag_N = get_bit(arm_read_register(p, ins_rd), 31) << N;
 				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0) << Z;
-				flag_C = (ins_shifter > arm_read_register(p, ins_rn) ? 0 : 1) << C;
-				// flag_V = OverflowFrom(arm_read_register(p, ins_rn) - ins_shifter) TODO page 1131
+				flag_C = borrow_from(arm_read_register(p, ins_rn), ins_shifter) << C;
+				flag_V = overflow_from(SOUSTRACTION, arm_read_register(p, ins_rn), ins_shifter) << V;
 
 				flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
 				flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
@@ -276,8 +276,8 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			} else if (ins_S == 1) {
 				flag_N = get_bit(arm_read_register(p, ins_rd), 31) << N;
 				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0) << Z;
-				flag_C = (arm_read_register(p, ins_rn) > ins_shifter ? 0 : 1) << C;
-				// flag_V = OverflowFrom(ins_shifter - arm_read_register(p, ins_rn)) TODO
+				flag_C = borrow_from(ins_shifter, arm_read_register(p, ins_rn)) << C;
+				flag_V = overflow_from(SOUSTRACTION, ins_shifter, arm_read_register(p, ins_rn)) << V;
 
 				flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
 				flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
@@ -298,8 +298,8 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			} else if (ins_S == 1) {
 				flag_N = get_bit(arm_read_register(p, ins_rd), 31) << N;
 				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0) << Z;
-				// flag_C = CarryFrom(arm_read_register(p, ins_rn) + ins_shifter) TODO page 1124
-				// flag_V = OverflowFrom(arm_read_register(p, ins_rn) + ins_shifter) TODO
+				flag_C = carry_from(arm_read_register(p, ins_rn), ins_shifter) << C;
+				flag_V = overflow_from(ADDITION, arm_read_register(p, ins_rn), ins_shifter) << V;
 
 				flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
 				flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
@@ -320,8 +320,8 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			} else if (ins_S == 1) {
 				flag_N = get_bit(arm_read_register(p, ins_rd), 31) << N;
 				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0) << Z;
-				// flag_C = CarryFrom(arm_read_register(p, ins_rn) + ins_shifter + get_bit(arm_read_cpsr(p), 29)) TODO
-				// flag_V = OverflowFrom(arm_read_register(p, ins_rn) + ins_shifter + get_bit(arm_read_cpsr(p), 29)) TODO
+				flag_C = carry_from(arm_read_register(p, ins_rn), ins_shifter, get_bit(arm_read_cpsr(p), 29)) << C;
+				flag_V = overflow_from(ADDITION, arm_read_register(p, ins_rn), ins_shifter, get_bit(arm_read_cpsr(p), 29)) << V;
 
 				flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
 				flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
@@ -332,7 +332,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 
 		// SBC soustraction avec carry page 275
 		case 0x6:
-			arm_write_register(p, ins_rd, arm_read_register(p, ins_rn) - ins_shifter - ~get_bit(arm_read_cpsr(p), 29));
+			arm_write_register(p, ins_rd, arm_read_register(p, ins_rn) - ins_shifter - !get_bit(arm_read_cpsr(p), 29));
 
 			if (ins_S == 1 && ins_rd == 0xf) {
 				if (arm_current_mode_has_spsr(p)) {
@@ -342,8 +342,8 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			} else if (ins_S == 1) {
 				flag_N = get_bit(arm_read_register(p, ins_rd), 31) << N;
 				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0) << Z;
-				// flag_C = CarryFrom(arm_read_register(p, ins_rn) - ins_shifter - ~get_bit(arm_read_cpsr(p), 29)) TODO
-				// flag_V = OverflowFrom(arm_read_register(p, ins_rn) - ins_shifter - ~get_bit(arm_read_cpsr(p), 29)) TODO
+				flag_C = !borrow_from(arm_read_register(p, ins_rn), ins_shifter, !get_bit(arm_read_cpsr(p), 29)) << C;
+				flag_V = overflow_from(SOUSTRACTION, arm_read_register(p, ins_rn), ins_shifter, !get_bit(arm_read_cpsr(p), 29)) << V;
 
 				flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
 				flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
@@ -354,7 +354,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 
 		// RSC soustraction avec carry et opérandes inversées page 267
 		case 0x7:
-			arm_write_register(p, ins_rd, ins_shifter - arm_read_register(p, ins_rn) - ~get_bit(arm_read_cpsr(p), 29));
+			arm_write_register(p, ins_rd, ins_shifter - arm_read_register(p, ins_rn) - !get_bit(arm_read_cpsr(p), 29));
 
 			if (ins_S == 1 && ins_rd == 0xf) {
 				if (arm_current_mode_has_spsr(p)) {
@@ -364,8 +364,8 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			} else if (ins_S == 1) {
 				flag_N = get_bit(arm_read_register(p, ins_rd), 31) << N;
 				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0) << Z;
-				// flag_C = CarryFrom(ins_shifter - arm_read_register(p, ins_rn) - ~get_bit(arm_read_cpsr(p), 29)) TODO
-				// flag_V = OverflowFrom(ins_shifter - arm_read_register(p, ins_rn) - ~get_bit(arm_read_cpsr(p), 29)) TODO
+				flag_C = !borrow_from(ins_shifter, arm_read_register(p, ins_rn), !get_bit(arm_read_cpsr(p), 29)) << C;
+				flag_V = overflow_from(SOUSTRACTION, ins_shifter, arm_read_register(p, ins_rn), !get_bit(arm_read_cpsr(p), 29)) << V;
 
 				flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
 				flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
@@ -412,8 +412,8 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			
 			flag_N = get_bit(alu_out, 31) << N;
 			flag_Z = (alu_out == 0 ? 1 : 0) << Z;
-			flag_C = (ins_shifter > arm_read_register(p, ins_rn) ? 0 : 1) << C;
-			// flag_V = OverflowFrom(arm_read_register(p, ins_rn) - ins_shifter) TODO
+			flag_C = borrow_from(arm_read_register(p, ins_rn), ins_shifter) << C;
+			flag_V = overflow_from(SOUSTRACTION, arm_read_register(p, ins_rn), ins_shifter) << V;
 			
 			flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
 			flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
@@ -428,8 +428,8 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			
 			flag_N = get_bit(alu_out, 31) << N;
 			flag_Z = (alu_out == 0 ? 1 : 0) << Z;
-			// flag_C = CarryFrom(arm_read_register(p, ins_rn) + ins_shifter) TODO
-			// flag_V = OverflowFrom(arm_read_register(p, ins_rn) + ins_shifter) TODO
+			flag_C = carry_from(arm_read_register(p, ins_rn), ins_shifter) << C;
+			flag_V = overflow_from(ADDITION, arm_read_register(p, ins_rn), ins_shifter) << V;
 			
 			flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
 			flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
@@ -539,13 +539,23 @@ int borrow_from(uint32_t a, uint32_t b) {
 	return b > a;
 }
 
+int borrow_from(uint32_t a, uint32_t b, uint32_t c) {
+	// a - b - c = d cause un Borrow si le résultat est inférieur à 0, donc si b > a
+	return a < b + c || b > a - c || c > a - b;
+}
+
 int carry_from(uint32_t a, uint32_t b) {
 	// a + b = c cause un Carry si le résultat réel est supérieur à 2^32-1
     // a + b > 2^32-1 soit a > 2^32-1 - b OR b > 2^32-1 - a
 	return a > 0xffffffff - b || b > 0xfffffff - a;
 }
 
-int overflow_from(uint32_t a, int op, uint32_t b) {
+int carry_from(uint32_t a, uint32_t b, uint32_t c) {
+	// a + b + c = d cause un Carry si le résultat réel est supérieur à 2^32-1
+	return a > 0xffffffff - b - c || b > 0xfffffff - a - c || c > 0xfffffff - a - b;
+}
+
+int overflow_from(int op, uint32_t a, uint32_t b) {
 	uint32_t c = 0;
 
 	if (op == ADDITION) {
@@ -562,4 +572,8 @@ int overflow_from(uint32_t a, int op, uint32_t b) {
 		// code d'opération invalide, on renvoie false
 		return 0;
 	}
+}
+
+int overflow_from(int op, uint32_t a, uint32_t b, uint32_t c) {
+	return overflow_from(op, a, b) || overflow_from(op, a, c) || overflow_from(op, b, c) || overflow_from(op, a+b, c);
 }
