@@ -34,7 +34,7 @@ static int arm_execute_instruction(arm_core p) {
     uint32_t opcode;
     res = arm_fetch(p,&opcode);
 
-    if(!inst_cond( p, opcode)){
+    if(inst_cond( p, opcode)){
         
         //------arm_load_store 
         /* LDRH et STRH : 
