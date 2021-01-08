@@ -320,8 +320,8 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			} else if (ins_S == 1) {
 				flag_N = get_bit(arm_read_register(p, ins_rd), 31) << N;
 				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0) << Z;
-				flag_C = carry_from(arm_read_register(p, ins_rn), ins_shifter, get_bit(arm_read_cpsr(p), 29)) << C;
-				flag_V = overflow_from(ADDITION, arm_read_register(p, ins_rn), ins_shifter, get_bit(arm_read_cpsr(p), 29)) << V;
+				flag_C = carry_from_tri(arm_read_register(p, ins_rn), ins_shifter, get_bit(arm_read_cpsr(p), 29)) << C;
+				flag_V = overflow_from_tri(ADDITION, arm_read_register(p, ins_rn), ins_shifter, get_bit(arm_read_cpsr(p), 29)) << V;
 
 				flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
 				flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
@@ -342,8 +342,8 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			} else if (ins_S == 1) {
 				flag_N = get_bit(arm_read_register(p, ins_rd), 31) << N;
 				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0) << Z;
-				flag_C = !borrow_from(arm_read_register(p, ins_rn), ins_shifter, !get_bit(arm_read_cpsr(p), 29)) << C;
-				flag_V = overflow_from(SOUSTRACTION, arm_read_register(p, ins_rn), ins_shifter, !get_bit(arm_read_cpsr(p), 29)) << V;
+				flag_C = !borrow_from_tri(arm_read_register(p, ins_rn), ins_shifter, !get_bit(arm_read_cpsr(p), 29)) << C;
+				flag_V = overflow_from_tri(SOUSTRACTION, arm_read_register(p, ins_rn), ins_shifter, !get_bit(arm_read_cpsr(p), 29)) << V;
 
 				flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
 				flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
@@ -364,8 +364,8 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			} else if (ins_S == 1) {
 				flag_N = get_bit(arm_read_register(p, ins_rd), 31) << N;
 				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0) << Z;
-				flag_C = !borrow_from(ins_shifter, arm_read_register(p, ins_rn), !get_bit(arm_read_cpsr(p), 29)) << C;
-				flag_V = overflow_from(SOUSTRACTION, ins_shifter, arm_read_register(p, ins_rn), !get_bit(arm_read_cpsr(p), 29)) << V;
+				flag_C = !borrow_from_tri(ins_shifter, arm_read_register(p, ins_rn), !get_bit(arm_read_cpsr(p), 29)) << C;
+				flag_V = overflow_from_tri(SOUSTRACTION, ins_shifter, arm_read_register(p, ins_rn), !get_bit(arm_read_cpsr(p), 29)) << V;
 
 				flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
 				flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
@@ -539,7 +539,7 @@ int borrow_from(uint32_t a, uint32_t b) {
 	return b > a;
 }
 
-int borrow_from(uint32_t a, uint32_t b, uint32_t c) {
+int borrow_from_tri(uint32_t a, uint32_t b, uint32_t c) {
 	// a - b - c = d cause un Borrow si le résultat est inférieur à 0, donc si b > a
 	return a < b + c || b > a - c || c > a - b;
 }
@@ -550,7 +550,7 @@ int carry_from(uint32_t a, uint32_t b) {
 	return a > 0xffffffff - b || b > 0xfffffff - a;
 }
 
-int carry_from(uint32_t a, uint32_t b, uint32_t c) {
+int carry_from_tri(uint32_t a, uint32_t b, uint32_t c) {
 	// a + b + c = d cause un Carry si le résultat réel est supérieur à 2^32-1
 	return a > 0xffffffff - b - c || b > 0xfffffff - a - c || c > 0xfffffff - a - b;
 }
@@ -574,6 +574,6 @@ int overflow_from(int op, uint32_t a, uint32_t b) {
 	}
 }
 
-int overflow_from(int op, uint32_t a, uint32_t b, uint32_t c) {
+int overflow_from_tri(int op, uint32_t a, uint32_t b, uint32_t c) {
 	return overflow_from(op, a, b) || overflow_from(op, a, c) || overflow_from(op, b, c) || overflow_from(op, a+b, c);
 }

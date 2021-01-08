@@ -64,7 +64,7 @@ int borrow_from(uint32_t a, uint32_t b);
 	Sortie : 1 si l'opération (a - b - c) provoque un emprunt, c'est à dire si le résultat réel est inférieur à 0
 			 0 sinon
 */
-int borrow_from(uint32_t a, uint32_t b, uint32_t c);
+int borrow_from_tri(uint32_t a, uint32_t b, uint32_t c);
 
 /*
 	Entrée : deux uint32_t a et b
@@ -78,7 +78,7 @@ int carry_from(uint32_t a, uint32_t b);
 	Sortie : 1 si l'opération (a + b + c) provoque une retenue, c'est à dire si le résultat réel est supérieur à 2^32 - 1
 			 0 sinon
 */
-int carry_from(uint32_t a, uint32_t b, uint32_t c);
+int carry_from_tri(uint32_t a, uint32_t b, uint32_t c);
 
 /*
 	Entrée : deux uint32_t a et b, un code d'opération op (ADDITION ou SOUSTRACTION)
@@ -94,6 +94,6 @@ int overflow_from(int op, uint32_t a, uint32_t b);
 			 0 sinon
 			 0 si le code d'opération est invalide
 */
-int overflow_from(int op, uint32_t a, uint32_t b);
+int overflow_from_tri(int op, uint32_t a, uint32_t b, uint32_t c);
 
 #endif
