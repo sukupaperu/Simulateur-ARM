@@ -61,7 +61,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 	// 1 valeur immédiate
 	uint32_t ins_shifter;
 	if (ins_I == 1) {
-		uint8_t rotation = ((ins >> 8) && 0xf) * 2;
+		uint8_t rotation = ((ins >> 8) & 0xf) * 2;
 		ins_shifter = ror(ins & 0xff,rotation);
 
 		if ((ins >> 8) && 0xf != 0) {
