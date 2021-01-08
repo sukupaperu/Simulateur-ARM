@@ -56,10 +56,17 @@ static int arm_execute_instruction(arm_core p) {
             res=arm_load_store( p, opcode);
         }
         /*LDM et STM :
-        * opcode[27:25] == 0b100
-        */
+         * opcode[27:25] == 0b100
+         */
         else if(get_bits(opcode, 27,25)==0b100){
             res=arm_load_store_multiple( p, opcode);
+        }
+        /* 
+         * SWI:
+         * opcode[27:24] == 0b1111
+         */
+        else if(get_bits(opcode, 27,24)==0b1111){
+            res=arm_coprocessor_others_swi(p, opcode);
         }
 
         //------arm_data_processing
