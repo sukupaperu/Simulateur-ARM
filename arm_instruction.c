@@ -85,17 +85,7 @@ static int arm_execute_instruction(arm_core p) {
         else if(get_bits(opcode, 27,26)==0b00){
             res=arm_data_processing_shift(p, opcode);
         }
-        /*
-        * LDRH, STRH
-        * opcode[27:25] == 0b000
-        * opcode[7:4] == 0b1011
-        * opcode[22] == 1
-        * opcode[20] == 1/0
-        */
-        else if((get_bits(opcode, 27,25)==0b000) && 
-                (get_bits(opcode, 7, 4)==0b1011) && (get_bit(opcode, 22) ==1)){
-            res=arm_data_processing_shift(p, opcode);
-        }
+        
         /*
         * LDM, STM
         * opcode[27:25] == 0b100
