@@ -37,15 +37,11 @@ static int arm_execute_instruction(arm_core p) {
     if(!inst_cond( p, opcode)){
         
         //------arm_load_store 
-        /* LDH et STRH : 
+        /* LDRH et STRH : 
          *  opcode[27:25] == 0b000
-         *  opcode[7] == 1
-         *  opcode[4] == 1
-         *  opcode[24] != 0
-         *  opcode[6:5] != 0
+         *  opcode[7:4] == 1011
          */
-        if(get_bits(opcode, 27,25)==0 && get_bit(opcode, 7)== 1 &&
-           get_bit(opcode, 4)==1 && get_bit(opcode, 24)!=0 && get_bits(opcode, 6,5)!=0){
+        if(get_bits(opcode, 27,25)==0 && get_bits(opcode, 7,4)==0b1011 ){
             res=arm_load_store( p, opcode);
         }
         /* LDR, LDRB, STR et STRB : 
