@@ -533,3 +533,33 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 int arm_data_processing_immediate_msr(arm_core p, uint32_t ins) {
     return UNDEFINED_INSTRUCTION;
 }
+
+int borrow_from(uint32_t a, uint32_t b) {
+	// a - b = c cause un Borrow si le résultat est inférieur à 0, donc si b > a
+	return b > a;
+}
+
+int carry_from(uint32_t a, uint32_t b) {
+	// a + b = c cause un Carry si le résultat réel est supérieur à 2^32-1
+    // a + b > 2^32-1 soit a > 2^32-1 - b OR b > 2^32-1 - a
+	return a > 0xffffffff - b || b > 0xfffffff - a;
+}
+
+int overflow_from(uint32_t a, int op, uint32_t b) {
+	uint32_t c = 0;
+
+	if (op == ADDITION) {
+		c = a + b;
+		// a + b = c cause un Overflow si a[31] == b[31] && a[31] != c[31]
+		return get_bit(a, 31) == get_bit(b, 31) && get_bit(a, 31) != get_bit(c, 31);
+
+	} else if (op == SOUSTRACTION) {
+		c = a - b;
+		// a - b = c cause un Overflow si a[31] != b[31] && a[31] != c[31]
+		return get_bit(a, 31) == get_bit(b, 31) && get_bit(a, 31) != get_bit(c, 31);
+
+	} else {
+		// code d'opération invalide, on renvoie false
+		return 0;
+	}
+}
