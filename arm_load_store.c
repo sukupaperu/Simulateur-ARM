@@ -50,9 +50,7 @@ int arm_load_store(arm_core p, uint32_t ins) {
     // adresse de base (adresse mémoire à laquelle aura lieu l'accès en lecture/écriture)
     uint32_t address = arm_read_register(p, rn_register);
     if(rn_register == 15)
-        address = arm_read_register(p, rn_register) + 8;
-    else
-        address = arm_read_register(p, rn_register);
+        address += 8;
 
     // vaut 1 si on l'accès mémoire concerne un mot (32bits) ou bien un octet non signé
     int is_word_or_unsigned_byte_access = get_bits(ins, 27, 26) == 0b01;
@@ -98,7 +96,7 @@ int arm_load_store(arm_core p, uint32_t ins) {
                         // bit de retenue sortante
                         int carry_flag = get_bit(arm_read_cpsr(p), C);
 
-                        offset = ((carry_flag << 31) | (rm_register_value > 1));
+                        offset = ((carry_flag << 31) | (rm_register_value >> 1));
                     } else {
                         offset = ror(rm_register_value, shift_immediate_value); 
                     }
@@ -329,7 +327,7 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
             }
 
         }
-    } else { // se produit si l'instruction n'est pas reconnue comme une instruction d'accès mémoire connue
+    } else { // se produit si l'instruction n'est pas reconnue comme une instruction d'accès mémoire connue (STM(1) ou LDM(1) seulement)
         return UNDEFINED_INSTRUCTION;
     }
 
