@@ -31,30 +31,37 @@ int arm_branch(arm_core p, uint32_t ins) {
     /*
         On isole les parties de l'instruction qui nous intéressent pour la suite du décodage.
     */
+    // vaut 1 s'il s'agit bien d'une instruction de branchement
+    /* int is_branch_instruction = get_bits(ins, 27, 25) == 0b101;
+    if(!is_branch_instruction) return UNDEFINED_INSTRUCTION; */
 
-    // sur 24bits, l'adresse immédiate de l'instruction sur laquelle on veut effectuer le branchement
-    uint32_t signed_immed_24 = get_bits(ins, 23, 0);
+    // sur 23bits (24 - signe de bit), l'adresse immédiate de l'instruction sur laquelle on veut effectuer le branchement
+    uint32_t signed_immed_23 = get_bits(ins, 22, 0);
+    // sur 1 bit, le bit de signe (bit 24) de la valeur immédiate signed_immed_23
+    int sign_bit = get_bit(ins, 23);
     // vaut 1 si l'adresse de retour doit être stockée dans r14 (registre LR)
     int store_return_address = get_bit(ins, 24);
-    // vaut 1 s'il s'agit bien d'une instruction de branchement (#TODO : à supprimer par la suite)
-    int is_branch_instruction = get_bits(ins, 27, 25) == 0b101;
 
-    if(is_branch_instruction) {
-        uint32_t pc_value = arm_read_register(p, 15);
-        if(store_return_address)
-            arm_write_register(p, 14, pc_value);
-        
-        // extension du bit de signe pour passer la valeur de 24 à 30 bits
-        int sign_bit = get_bit(signed_immed_24, 23);
-        if(sign_bit) {
-            signed_immed_24 = clr_bit(signed_immed_24, 23);
-            signed_immed_24 = set_bit(signed_immed_24, 29);
-        }
+    uint32_t pc_value = arm_read_register(p, 15);
 
-        arm_write_register(p, 15, pc_value + (signed_immed_24 << 2));
-    } else { // se produit si l'instruction n'est pas reconnue comme étant une instruction de branchement
-        return UNDEFINED_INSTRUCTION;
-    }
+    // si instruction BL, stockage de l'adresse de retour dans LR (r14)
+    if(store_return_address)
+        // "pc_value - 4"  car la valeur de PC (r15) pointe toujours 2 instructions plus loin 
+        // (soit adresse_instruction_courante + 8, 
+        // d'où le "-4" pour avancer d'une instruction seulement)
+        arm_write_register(p, 14, pc_value - 4);
+    
+    // ajout et extension du bit de signe (s'il est égal à 1) pour passer la valeur de 24 à 30 bits
+    if(sign_bit)
+        signed_immed_23 |= 0b1111111 << 23;
+    // on passe la valeur sur 32 bits
+    signed_immed_23 <<= 2;
+
+    // on ré-interprête la valeur obtenue en bit signé
+    int32_t new_signed_immed_32 = signed_immed_23;
+
+    // branchement par ré-écriture du registre PC
+    arm_write_register(p, 15, pc_value + new_signed_immed_32);
 
     return 0;
 }
