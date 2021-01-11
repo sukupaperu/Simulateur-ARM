@@ -304,13 +304,6 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
                 address += is_upwards_transfert ? 4 : -4;
                 
                 arm_write_register(p, 15, value & 0xfffffffe);
-
-                uint32_t cpsr_value = arm_read_register(p, 16);
-                if(get_bit(value, 0) == 1)
-                    cpsr_value = set_bit(cpsr_value, 0);
-                else
-                    cpsr_value = clr_bit(cpsr_value, 0);
-                arm_write_register(p, 16, cpsr_value);
             }
 
         } else { // instruction STM(1)
