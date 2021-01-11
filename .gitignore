@@ -18,9 +18,7 @@ registers_test
 send_irq
 
 Examples/example[0-9]
-Examples/test_adc
-Examples/test_orr_bic
-Examples/test_mvn
+Examples/ex_[A-Z][A-Z][A-Z]
 autom4te.cache
 
 *.stackdump
