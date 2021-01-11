@@ -19,6 +19,7 @@ send_irq
 insertion_sort
 
 Examples/example[0-9]
+Examples/ex_[A-Z][A-Z][A-Z]
 autom4te.cache
 .deps
 .vscode

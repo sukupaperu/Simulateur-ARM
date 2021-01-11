@@ -64,7 +64,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 		uint8_t rotation = ((ins >> 8) & 0xf) * 2;
 		ins_shifter = ror(ins & 0xff,rotation);
 
-		if ((ins >> 8) && 0xf != 0) {
+		if (rotation != 0) {
 			shifter_carry_out = get_bit(ins_shifter, 31);
 		}
 
