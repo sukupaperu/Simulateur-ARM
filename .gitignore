@@ -3,9 +3,9 @@
 *.bin
 *.stackdump
 *.gch
+*.in
 
 Makefile
-Makefile.in
 
 stamp-h1
 config.h
@@ -20,6 +20,7 @@ insertion_sort
 
 Examples/example[0-9]
 Examples/ex_[A-Z][A-Z][A-Z]
+Examples/ex_LDR_STR_LDM_STM
 autom4te.cache
 .deps
 .vscode
