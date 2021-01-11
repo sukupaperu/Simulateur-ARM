@@ -55,7 +55,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 	uint32_t ins_rd = (uint8_t) (ins >> 12) & 0xf;
 
 	// un carry, utilisé par le shifter
-	char shifter_carry_out = (char) get_bit(arm_read_cpsr(p), 29);
+	char shifter_carry_out = (char) get_bit(arm_read_cpsr(p), C);
 
 	// shifter operand, sur 12 bits, représente soit une valeur immédiate soit un registre, sert de seconde opérande
 	// 1 valeur immédiate
@@ -208,14 +208,12 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 				} // else { UNPREDICTABLE }
 
 			} else if (ins_S == 1) {
-				flag_N = get_bit(arm_read_register(p, ins_rd), 31) << N;
-				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0) << Z;
-				flag_C = shifter_carry_out << C;
+				flag_N = get_bit(arm_read_register(p, ins_rd), 31);
+				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0);
+				flag_C = shifter_carry_out;
 				// V is unaffected
 
-				flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
-				flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
-				arm_write_cpsr(p, flag_N);
+				write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			}
 			break;
 
@@ -230,14 +228,12 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 				} // else { UNPREDICTABLE }
 
 			} else if (ins_S == 1) {
-				flag_N = get_bit(arm_read_register(p, ins_rd), 31) << N;
-				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0) << Z;
-				flag_C = shifter_carry_out << C;
+				flag_N = get_bit(arm_read_register(p, ins_rd), 31);
+				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0);
+				flag_C = shifter_carry_out;
 				// V is unaffected
 
-				flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
-				flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
-				arm_write_cpsr(p, flag_N);
+				write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			}
 			break;
 
@@ -252,14 +248,12 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 				} // else { UNPREDICTABLE }
 
 			} else if (ins_S == 1) {
-				flag_N = get_bit(arm_read_register(p, ins_rd), 31) << N;
-				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0) << Z;
-				flag_C = borrow_from(arm_read_register(p, ins_rn), ins_shifter) << C;
-				flag_V = overflow_from(SOUSTRACTION, arm_read_register(p, ins_rn), ins_shifter) << V;
+				flag_N = get_bit(arm_read_register(p, ins_rd), 31);
+				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0);
+				flag_C = borrow_from(arm_read_register(p, ins_rn), ins_shifter);
+				flag_V = overflow_from(SOUSTRACTION, arm_read_register(p, ins_rn), ins_shifter);
 
-				flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
-				flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
-				arm_write_cpsr(p, flag_N);
+				write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			}
 			break;
 			
@@ -274,14 +268,12 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 				} // else { UNPREDICTABLE }
 
 			} else if (ins_S == 1) {
-				flag_N = get_bit(arm_read_register(p, ins_rd), 31) << N;
-				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0) << Z;
-				flag_C = borrow_from(ins_shifter, arm_read_register(p, ins_rn)) << C;
-				flag_V = overflow_from(SOUSTRACTION, ins_shifter, arm_read_register(p, ins_rn)) << V;
+				flag_N = get_bit(arm_read_register(p, ins_rd), 31);
+				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0);
+				flag_C = borrow_from(ins_shifter, arm_read_register(p, ins_rn));
+				flag_V = overflow_from(SOUSTRACTION, ins_shifter, arm_read_register(p, ins_rn));
 
-				flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
-				flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
-				arm_write_cpsr(p, flag_N);
+				write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			}
 			break;
 			
@@ -296,21 +288,19 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 				} // else { UNPREDICTABLE }
 
 			} else if (ins_S == 1) {
-				flag_N = get_bit(arm_read_register(p, ins_rd), 31) << N;
-				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0) << Z;
-				flag_C = carry_from(arm_read_register(p, ins_rn), ins_shifter) << C;
-				flag_V = overflow_from(ADDITION, arm_read_register(p, ins_rn), ins_shifter) << V;
+				flag_N = get_bit(arm_read_register(p, ins_rd), 31);
+				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0);
+				flag_C = carry_from(arm_read_register(p, ins_rn), ins_shifter);
+				flag_V = overflow_from(ADDITION, arm_read_register(p, ins_rn), ins_shifter);
 
-				flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
-				flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
-				arm_write_cpsr(p, flag_N);
+				write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			}
 			break;
 			
 
 		// ADC addition avec carry page 154
 		case 0x5:
-			arm_write_register(p, ins_rd, arm_read_register(p, ins_rn) + ins_shifter + get_bit(arm_read_cpsr(p), 29));
+			arm_write_register(p, ins_rd, arm_read_register(p, ins_rn) + ins_shifter + get_bit(arm_read_cpsr(p), C));
 
 			if (ins_S == 1 && ins_rd == 0xf) {
 				if (arm_current_mode_has_spsr(p)) {
@@ -318,21 +308,19 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 				} // else { UNPREDICTABLE }
 
 			} else if (ins_S == 1) {
-				flag_N = get_bit(arm_read_register(p, ins_rd), 31) << N;
-				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0) << Z;
-				flag_C = carry_from_tri(arm_read_register(p, ins_rn), ins_shifter, get_bit(arm_read_cpsr(p), 29)) << C;
-				flag_V = overflow_from_tri(ADDITION, arm_read_register(p, ins_rn), ins_shifter, get_bit(arm_read_cpsr(p), 29)) << V;
+				flag_N = get_bit(arm_read_register(p, ins_rd), 31);
+				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0);
+				flag_C = carry_from_tri(arm_read_register(p, ins_rn), ins_shifter, get_bit(arm_read_cpsr(p), C));
+				flag_V = overflow_from_tri(ADDITION, arm_read_register(p, ins_rn), ins_shifter, get_bit(arm_read_cpsr(p), C));
 
-				flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
-				flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
-				arm_write_cpsr(p, flag_N);
+				write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			}
 			break;
 			
 
 		// SBC soustraction avec carry page 275
 		case 0x6:
-			arm_write_register(p, ins_rd, arm_read_register(p, ins_rn) - ins_shifter - !get_bit(arm_read_cpsr(p), 29));
+			arm_write_register(p, ins_rd, arm_read_register(p, ins_rn) - ins_shifter - !get_bit(arm_read_cpsr(p), C));
 
 			if (ins_S == 1 && ins_rd == 0xf) {
 				if (arm_current_mode_has_spsr(p)) {
@@ -340,21 +328,19 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 				} // else { UNPREDICTABLE }
 
 			} else if (ins_S == 1) {
-				flag_N = get_bit(arm_read_register(p, ins_rd), 31) << N;
-				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0) << Z;
-				flag_C = !borrow_from_tri(arm_read_register(p, ins_rn), ins_shifter, !get_bit(arm_read_cpsr(p), 29)) << C;
-				flag_V = overflow_from_tri(SOUSTRACTION, arm_read_register(p, ins_rn), ins_shifter, !get_bit(arm_read_cpsr(p), 29)) << V;
+				flag_N = get_bit(arm_read_register(p, ins_rd), 31);
+				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0);
+				flag_C = !borrow_from_tri(arm_read_register(p, ins_rn), ins_shifter, !get_bit(arm_read_cpsr(p), C));
+				flag_V = overflow_from_tri(SOUSTRACTION, arm_read_register(p, ins_rn), ins_shifter, !get_bit(arm_read_cpsr(p), C));
 
-				flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
-				flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
-				arm_write_cpsr(p, flag_N);
+				write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			}
 			break;
 			
 
 		// RSC soustraction avec carry et opérandes inversées page 267
 		case 0x7:
-			arm_write_register(p, ins_rd, ins_shifter - arm_read_register(p, ins_rn) - !get_bit(arm_read_cpsr(p), 29));
+			arm_write_register(p, ins_rd, ins_shifter - arm_read_register(p, ins_rn) - !get_bit(arm_read_cpsr(p), C));
 
 			if (ins_S == 1 && ins_rd == 0xf) {
 				if (arm_current_mode_has_spsr(p)) {
@@ -362,14 +348,12 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 				} // else { UNPREDICTABLE }
 
 			} else if (ins_S == 1) {
-				flag_N = get_bit(arm_read_register(p, ins_rd), 31) << N;
-				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0) << Z;
-				flag_C = !borrow_from_tri(ins_shifter, arm_read_register(p, ins_rn), !get_bit(arm_read_cpsr(p), 29)) << C;
-				flag_V = overflow_from_tri(SOUSTRACTION, ins_shifter, arm_read_register(p, ins_rn), !get_bit(arm_read_cpsr(p), 29)) << V;
+				flag_N = get_bit(arm_read_register(p, ins_rd), 31);
+				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0);
+				flag_C = !borrow_from_tri(ins_shifter, arm_read_register(p, ins_rn), !get_bit(arm_read_cpsr(p), C));
+				flag_V = overflow_from_tri(SOUSTRACTION, ins_shifter, arm_read_register(p, ins_rn), !get_bit(arm_read_cpsr(p), C));
 
-				flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
-				flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
-				arm_write_cpsr(p, flag_N);
+				write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			}
 			break;
 			
@@ -378,14 +362,12 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 		case 0x8: {
 			uint32_t alu_out = arm_read_register(p, ins_rn) & ins_shifter;
 			
-			flag_N = get_bit(alu_out, 31) << N;
-			flag_Z = (alu_out == 0 ? 1 : 0) << Z;
-			flag_C = shifter_carry_out << C;
+			flag_N = get_bit(alu_out, 31);
+			flag_Z = (alu_out == 0 ? 1 : 0);
+			flag_C = shifter_carry_out;
 			// flag_V unaffected
 			
-			flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
-			flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
-			arm_write_cpsr(p, flag_N);
+			write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			break;
 		}
 			
@@ -394,14 +376,12 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 		case 0x9: {
 			uint32_t alu_out = arm_read_register(p, ins_rn) ^ ins_shifter;
 			
-			flag_N = get_bit(alu_out, 31) << N;
-			flag_Z = (alu_out == 0 ? 1 : 0) << Z;
-			flag_C = shifter_carry_out << C;
+			flag_N = get_bit(alu_out, 31);
+			flag_Z = (alu_out == 0 ? 1 : 0);
+			flag_C = shifter_carry_out;
 			// flag_V unaffected
 			
-			flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
-			flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
-			arm_write_cpsr(p, flag_N);
+			write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			break;
 		}
 			
@@ -410,14 +390,12 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 		case 0xa: {
 			uint32_t alu_out = arm_read_register(p, ins_rn) - ins_shifter;
 			
-			flag_N = get_bit(alu_out, 31) << N;
-			flag_Z = (alu_out == 0 ? 1 : 0) << Z;
-			flag_C = borrow_from(arm_read_register(p, ins_rn), ins_shifter) << C;
-			flag_V = overflow_from(SOUSTRACTION, arm_read_register(p, ins_rn), ins_shifter) << V;
+			flag_N = get_bit(alu_out, 31);
+			flag_Z = (alu_out == 0 ? 1 : 0);
+			flag_C = borrow_from(arm_read_register(p, ins_rn), ins_shifter);
+			flag_V = overflow_from(SOUSTRACTION, arm_read_register(p, ins_rn), ins_shifter);
 			
-			flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
-			flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
-			arm_write_cpsr(p, flag_N);
+			write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			break;
 		}
 			
@@ -426,14 +404,12 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 		case 0xb: {
 			uint32_t alu_out = arm_read_register(p, ins_rn) + ins_shifter;
 			
-			flag_N = get_bit(alu_out, 31) << N;
-			flag_Z = (alu_out == 0 ? 1 : 0) << Z;
-			flag_C = carry_from(arm_read_register(p, ins_rn), ins_shifter) << C;
-			flag_V = overflow_from(ADDITION, arm_read_register(p, ins_rn), ins_shifter) << V;
+			flag_N = get_bit(alu_out, 31);
+			flag_Z = (alu_out == 0 ? 1 : 0);
+			flag_C = carry_from(arm_read_register(p, ins_rn), ins_shifter);
+			flag_V = overflow_from(ADDITION, arm_read_register(p, ins_rn), ins_shifter);
 			
-			flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
-			flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
-			arm_write_cpsr(p, flag_N);
+			write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			break;
 		}
 			
@@ -448,14 +424,12 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 				} // else { UNPREDICTABLE }
 
 			} else if (ins_S == 1) {
-				flag_N = get_bit(arm_read_register(p, ins_rd), 31) << N;
-				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0) << Z;
-				flag_C = shifter_carry_out << C;
+				flag_N = get_bit(arm_read_register(p, ins_rd), 31);
+				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0);
+				flag_C = shifter_carry_out;
 				// V is unaffected
 
-				flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
-				flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
-				arm_write_cpsr(p, flag_N);
+				write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			}
 			break;
 			
@@ -470,14 +444,12 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 				} // else { UNPREDICTABLE }
 
 			} else if (ins_S == 1) {
-				flag_N = get_bit(arm_read_register(p, ins_rd), 31) << N;
-				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0) << Z;
-				flag_C = shifter_carry_out << C;
+				flag_N = get_bit(arm_read_register(p, ins_rd), 31);
+				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0);
+				flag_C = shifter_carry_out;
 				// V is unaffected
 
-				flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
-				flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
-				arm_write_cpsr(p, flag_N);
+				write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			}
 			break;
 			
@@ -492,14 +464,12 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 				} // else { UNPREDICTABLE }
 
 			} else if (ins_S == 1) {
-				flag_N = get_bit(arm_read_register(p, ins_rd), 31) << N;
-				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0) << Z;
-				flag_C = shifter_carry_out << C;
+				flag_N = get_bit(arm_read_register(p, ins_rd), 31);
+				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0);
+				flag_C = shifter_carry_out;
 				// V is unaffected
 
-				flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
-				flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
-				arm_write_cpsr(p, flag_N);
+				write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			}
 			break;
 			
@@ -514,14 +484,12 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 				} // else { UNPREDICTABLE }
 
 			} else if (ins_S == 1) {
-				flag_N = get_bit(arm_read_register(p, ins_rd), 31) << N;
-				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0) << Z;
-				flag_C = shifter_carry_out << C;
+				flag_N = get_bit(arm_read_register(p, ins_rd), 31);
+				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0);
+				flag_C = shifter_carry_out;
 				// V is unaffected
 
-				flag_N = (flag_N | flag_Z | flag_C | flag_V) | 0x0fffffff;
-				flag_N = (arm_read_cpsr(p) | 0x0fffffff) & flag_N;
-				arm_write_cpsr(p, flag_N);
+				write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			}
 			break;
 	}
@@ -576,4 +544,20 @@ int overflow_from(int op, uint32_t a, uint32_t b) {
 
 int overflow_from_tri(int op, uint32_t a, uint32_t b, uint32_t c) {
 	return overflow_from(op, a, b) || overflow_from(op, a, c) || overflow_from(op, b, c) || overflow_from(op, a+b, c);
+}
+
+void write_flags(uint32_t flag_N, uint32_t flag_Z, uint32_t flag_C, uint32_t flag_V, arm_core p) {
+	// décalage des bits à leur place
+	flag_N = flag_N << N;
+	flag_Z = flag_Z << Z;
+	flag_C = flag_C << C;
+	flag_V = flag_V << V;
+
+	// on réunit les flags pour obtenir OxX0000000, X étant les 4 bits des flags
+	flag_N = (flag_N | flag_Z | flag_C | flag_V);
+
+	// flag_N prend la valeur à écrire dans cpsr, qui est la valeur actuelle mais seuls les flags changents (bits de poids fort)
+	flag_N = (arm_read_cpsr(p) & 0x0fffffff) | flag_N;
+	// on écrit le résultat
+	arm_write_cpsr(p, flag_N);
 }
