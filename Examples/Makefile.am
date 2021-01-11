@@ -27,6 +27,10 @@ ex_SUB_SOURCES=ex_SUB.s
 ex_MVN_SOURCES=ex_MVN.s
 ex_ORR_SOURCES=ex_ORR.s
 ex_BIC_SOURCES=ex_BIC.s
+ex_TST_SOURCES=ex_TST.s
+ex_TEQ_SOURCES=ex_TEQ.s
+ex_CMP_SOURCES=ex_CMP.s
+ex_CMN_SOURCES=ex_CMN.s
 
 EXTRA_DIST=linker_script
 
