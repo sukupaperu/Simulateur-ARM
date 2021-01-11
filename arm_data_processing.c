@@ -213,7 +213,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 				flag_C = shifter_carry_out;
 				// V is unaffected
 
-				write_flags(flag_N, flag_Z, flag_C, flag_V);
+				write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			}
 			break;
 
@@ -233,7 +233,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 				flag_C = shifter_carry_out;
 				// V is unaffected
 
-				write_flags(flag_N, flag_Z, flag_C, flag_V);
+				write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			}
 			break;
 
@@ -253,7 +253,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 				flag_C = borrow_from(arm_read_register(p, ins_rn), ins_shifter);
 				flag_V = overflow_from(SOUSTRACTION, arm_read_register(p, ins_rn), ins_shifter);
 
-				write_flags(flag_N, flag_Z, flag_C, flag_V);
+				write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			}
 			break;
 			
@@ -273,7 +273,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 				flag_C = borrow_from(ins_shifter, arm_read_register(p, ins_rn));
 				flag_V = overflow_from(SOUSTRACTION, ins_shifter, arm_read_register(p, ins_rn));
 
-				write_flags(flag_N, flag_Z, flag_C, flag_V);
+				write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			}
 			break;
 			
@@ -293,7 +293,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 				flag_C = carry_from(arm_read_register(p, ins_rn), ins_shifter);
 				flag_V = overflow_from(ADDITION, arm_read_register(p, ins_rn), ins_shifter);
 
-				write_flags(flag_N, flag_Z, flag_C, flag_V);
+				write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			}
 			break;
 			
@@ -313,7 +313,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 				flag_C = carry_from_tri(arm_read_register(p, ins_rn), ins_shifter, get_bit(arm_read_cpsr(p), C));
 				flag_V = overflow_from_tri(ADDITION, arm_read_register(p, ins_rn), ins_shifter, get_bit(arm_read_cpsr(p), C));
 
-				write_flags(flag_N, flag_Z, flag_C, flag_V);
+				write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			}
 			break;
 			
@@ -333,7 +333,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 				flag_C = !borrow_from_tri(arm_read_register(p, ins_rn), ins_shifter, !get_bit(arm_read_cpsr(p), C));
 				flag_V = overflow_from_tri(SOUSTRACTION, arm_read_register(p, ins_rn), ins_shifter, !get_bit(arm_read_cpsr(p), C));
 
-				write_flags(flag_N, flag_Z, flag_C, flag_V);
+				write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			}
 			break;
 			
@@ -353,7 +353,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 				flag_C = !borrow_from_tri(ins_shifter, arm_read_register(p, ins_rn), !get_bit(arm_read_cpsr(p), C));
 				flag_V = overflow_from_tri(SOUSTRACTION, ins_shifter, arm_read_register(p, ins_rn), !get_bit(arm_read_cpsr(p), C));
 
-				write_flags(flag_N, flag_Z, flag_C, flag_V);
+				write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			}
 			break;
 			
@@ -367,7 +367,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			flag_C = shifter_carry_out;
 			// flag_V unaffected
 			
-			write_flags(flag_N, flag_Z, flag_C, flag_V);
+			write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			break;
 		}
 			
@@ -381,7 +381,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			flag_C = shifter_carry_out;
 			// flag_V unaffected
 			
-			write_flags(flag_N, flag_Z, flag_C, flag_V);
+			write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			break;
 		}
 			
@@ -395,7 +395,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			flag_C = borrow_from(arm_read_register(p, ins_rn), ins_shifter);
 			flag_V = overflow_from(SOUSTRACTION, arm_read_register(p, ins_rn), ins_shifter);
 			
-			write_flags(flag_N, flag_Z, flag_C, flag_V);
+			write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			break;
 		}
 			
@@ -409,7 +409,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			flag_C = carry_from(arm_read_register(p, ins_rn), ins_shifter);
 			flag_V = overflow_from(ADDITION, arm_read_register(p, ins_rn), ins_shifter);
 			
-			write_flags(flag_N, flag_Z, flag_C, flag_V);
+			write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			break;
 		}
 			
@@ -429,7 +429,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 				flag_C = shifter_carry_out;
 				// V is unaffected
 
-				write_flags(flag_N, flag_Z, flag_C, flag_V);
+				write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			}
 			break;
 			
@@ -449,7 +449,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 				flag_C = shifter_carry_out;
 				// V is unaffected
 
-				write_flags(flag_N, flag_Z, flag_C, flag_V);
+				write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			}
 			break;
 			
@@ -469,7 +469,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 				flag_C = shifter_carry_out;
 				// V is unaffected
 
-				write_flags(flag_N, flag_Z, flag_C, flag_V);
+				write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			}
 			break;
 			
@@ -489,7 +489,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 				flag_C = shifter_carry_out;
 				// V is unaffected
 
-				write_flags(flag_N, flag_Z, flag_C, flag_V);
+				write_flags(flag_N, flag_Z, flag_C, flag_V, p);
 			}
 			break;
 	}
@@ -546,7 +546,7 @@ int overflow_from_tri(int op, uint32_t a, uint32_t b, uint32_t c) {
 	return overflow_from(op, a, b) || overflow_from(op, a, c) || overflow_from(op, b, c) || overflow_from(op, a+b, c);
 }
 
-void write_flags(uint32_t flag_N, uint32_t flag_Z, uint32_t flag_C, uint32_t flag_V) {
+void write_flags(uint32_t flag_N, uint32_t flag_Z, uint32_t flag_C, uint32_t flag_V, arm_core p) {
 	// décalage des bits à leur place
 	flag_N = flag_N << N;
 	flag_Z = flag_Z << Z;

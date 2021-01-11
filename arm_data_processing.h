@@ -101,6 +101,6 @@ int overflow_from_tri(int op, uint32_t a, uint32_t b, uint32_t c);
 	Sortie : void
 	Effets de bord : met à jour CPSR selon les flags indiqués
 */
-void write_flags(uint32_t flag_N, uint32_t flag_Z, uint32_t flag_C, uint32_t flag_V);
+void write_flags(uint32_t flag_N, uint32_t flag_Z, uint32_t flag_C, uint32_t flag_V, arm_core p);
 
 #endif
