@@ -16,6 +16,7 @@ arm_simulator
 memory_test
 registers_test
 send_irq
+insertion_sort
 
 Examples/example[0-9]
 autom4te.cache
