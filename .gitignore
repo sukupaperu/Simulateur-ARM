@@ -18,6 +18,8 @@ registers_test
 send_irq
 
 Examples/example[0-9]
+Examples/test_adc
+Examples/test_orr_bic
 autom4te.cache
 
 *.stackdump
