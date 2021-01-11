@@ -1,8 +1,8 @@
-.vscode
 *.o
 *.exe
 *.bin
-.deps
+*.stackdump
+*.gch
 
 Makefile
 Makefile.in
@@ -19,6 +19,5 @@ send_irq
 
 Examples/example[0-9]
 autom4te.cache
-
-*.stackdump
-*.gch
+.deps
+.vscode
