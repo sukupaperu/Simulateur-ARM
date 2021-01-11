@@ -69,11 +69,11 @@ static int arm_execute_instruction(arm_core p) {
             res=arm_branch(p, opcode);
         }
         /*
-        * MRS
+        * Miscellaneous instructions (uniquement MRS ici)
         * opcode[27:23] == 0b00010
-        * opcode[21:20] == 0b00
+        * opcode[4] == 0
         */
-        else if((get_bits(opcode, 27,23)==0b00010) && (get_bits(opcode, 21,20)==0b00)){
+        else if((get_bits(opcode, 27,23)==0b00010 && get_bit(opcode, 4)==0)){
             res=arm_miscellaneous(p, opcode);
         }
         /* 

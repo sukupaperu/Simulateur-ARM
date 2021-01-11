@@ -85,8 +85,7 @@ int arm_miscellaneous(arm_core p, uint32_t ins) {
     int is_mrs_instruction = 
         get_bits(ins, 11, 0) == 0
         && get_bits(ins, 19, 16) == 0b1111
-        && get_bits(ins, 21, 20) == 0b00
-        && get_bits(ins, 27, 23) == 0b00010;
+        && get_bits(ins, 21, 20) == 0b00;
 
     if(is_mrs_instruction) {
         // sur 4 bits, registre de destination pour l'instruction MRS
@@ -97,9 +96,9 @@ int arm_miscellaneous(arm_core p, uint32_t ins) {
         uint32_t psr_value;
 
         if(is_spsr_move)
-            psr_value = arm_read_register(p, 17);
+            psr_value = arm_read_spsr(p);
         else
-            psr_value = arm_read_register(p, 16);
+            psr_value = arm_read_cpsr(p);
         // if(destination_register == 15) -> UNPREDICTABLE
         arm_write_register(p, destination_register, psr_value);
     } else { // se produit si l'instruction n'est pas connue
