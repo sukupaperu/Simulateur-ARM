@@ -250,7 +250,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			} else if (ins_S == 1) {
 				flag_N = get_bit(arm_read_register(p, ins_rd), 31);
 				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0);
-				flag_C = borrow_from(arm_read_register(p, ins_rn), ins_shifter);
+				flag_C = !borrow_from(arm_read_register(p, ins_rn), ins_shifter);
 				flag_V = overflow_from(SOUSTRACTION, arm_read_register(p, ins_rn), ins_shifter);
 
 				write_flags(flag_N, flag_Z, flag_C, flag_V, p);
@@ -270,7 +270,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			} else if (ins_S == 1) {
 				flag_N = get_bit(arm_read_register(p, ins_rd), 31);
 				flag_Z = (arm_read_register(p, ins_rd) == 0 ? 1 : 0);
-				flag_C = borrow_from(ins_shifter, arm_read_register(p, ins_rn));
+				flag_C = !borrow_from(ins_shifter, arm_read_register(p, ins_rn));
 				flag_V = overflow_from(SOUSTRACTION, ins_shifter, arm_read_register(p, ins_rn));
 
 				write_flags(flag_N, flag_Z, flag_C, flag_V, p);
@@ -392,7 +392,7 @@ int arm_data_processing_shift(arm_core p, uint32_t ins) {
 			
 			flag_N = get_bit(alu_out, 31);
 			flag_Z = (alu_out == 0 ? 1 : 0);
-			flag_C = borrow_from(arm_read_register(p, ins_rn), ins_shifter);
+			flag_C = !borrow_from(arm_read_register(p, ins_rn), ins_shifter);
 			flag_V = overflow_from(SOUSTRACTION, arm_read_register(p, ins_rn), ins_shifter);
 			
 			write_flags(flag_N, flag_Z, flag_C, flag_V, p);
