@@ -36,7 +36,7 @@ static int arm_execute_instruction(arm_core p) {
     res = arm_fetch(p,&opcode);
 
     if(inst_cond( p, opcode)){
-        
+
         //------arm_load_store 
         /* LDRH et STRH : 
          *  opcode[27:25] == 0b000
@@ -59,7 +59,6 @@ static int arm_execute_instruction(arm_core p) {
         else if(get_bits(opcode, 27,25)==0b100){
             res=arm_load_store_multiple( p, opcode);
         }
-
         
         // ------arm_branch_other
         /*
@@ -98,17 +97,6 @@ static int arm_execute_instruction(arm_core p) {
         else if(get_bits(opcode, 27,26)==0b00){
             res=arm_data_processing_shift(p, opcode);
         }
-        
-        /*
-        * LDM, STM
-        * opcode[27:25] == 0b100
-        */
-        else if(get_bits(opcode, 27,25)==0b000){
-            res=arm_data_processing_shift(p, opcode);
-        }
-        
-
-        
 
     }
     return res;
