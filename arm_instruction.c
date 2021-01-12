@@ -73,7 +73,7 @@ static int arm_execute_instruction(arm_core p) {
         * opcode[27:23] == 0b00010
         * opcode[4] == 0
         */
-        else if((get_bits(opcode, 27,23)==0b00010 && get_bit(opcode, 4)==0)){
+        else if(get_bits(opcode, 27,23)==0b00010 && get_bits(opcode, 21, 20)==0b00){
             res=arm_miscellaneous(p, opcode);
         }
         /* 
