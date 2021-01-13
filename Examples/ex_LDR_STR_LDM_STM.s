@@ -90,11 +90,12 @@ main:
     ldmib r0, {r0-r15}
         # decrement after
     stmda r0, {r0-r15}
-    @ ldmda r0, {r0-r15} // ne fonctionne pas
+    ldmda r0, {r0-r14} @ ldmda r0, {r0-r15} // ne fonctionne pas
         # decrement before
     stmdb r0, {r0-r15}
-    @ ldmdb r0, {r0-r15} // ne fonctionne pas
+    ldmdb r0, {r0-r14} @ ldmdb r0, {r0-r15} // ne fonctionne pas
         # base register written back
-    // stmdb r0!, {r0-r15} // ne fonctionne pas
+    mov r0, #0b11010100
+    stmdb r0!, {r0-r15}
 
     swi 0x123456
