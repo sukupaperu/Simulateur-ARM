@@ -534,7 +534,7 @@ int overflow_from(int op, uint32_t a, uint32_t b) {
 	} else if (op == SOUSTRACTION) {
 		c = a - b;
 		// a - b = c cause un Overflow si a[31] != b[31] && a[31] != c[31]
-		return get_bit(a, 31) == get_bit(b, 31) && get_bit(a, 31) != get_bit(c, 31);
+		return get_bit(a, 31) != get_bit(b, 31) && get_bit(a, 31) != get_bit(c, 31);
 
 	} else {
 		// code d'opération invalide, on renvoie false
