@@ -20,7 +20,9 @@ insertion_sort
 
 Examples/example[0-9]
 Examples/ex_[A-Z][A-Z][A-Z]
-Examples/ex_LDR_STR_LDM_STM
+Examples/ex_LDR_STR_LDRB_STRB
+Examples/ex_LDRH_STRH
+Examples/ex_LDM_STM
 Examples/ex_COND
 
 autom4te.cache
