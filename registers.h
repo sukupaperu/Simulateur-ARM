@@ -1,124 +1,124 @@
 /*
-Armator - simulateur de jeu d'instruction ARMv5T à but pédagogique
+Armator - simulateur de jeu d'instruction ARMv5T Ã  but pÃ©dagogique
 Copyright (C) 2011 Guillaume Huard
 Ce programme est libre, vous pouvez le redistribuer et/ou le modifier selon les
-termes de la Licence Publique Générale GNU publiée par la Free Software
-Foundation (version 2 ou bien toute autre version ultérieure choisie par vous).
+termes de la Licence Publique GÃ©nÃ©rale GNU publiÃ©e par la Free Software
+Foundation (version 2 ou bien toute autre version ultÃ©rieure choisie par vous).
 
-Ce programme est distribué car potentiellement utile, mais SANS AUCUNE
+Ce programme est distribuÃ© car potentiellement utile, mais SANS AUCUNE
 GARANTIE, ni explicite ni implicite, y compris les garanties de
-commercialisation ou d'adaptation dans un but spécifique. Reportez-vous à la
-Licence Publique Générale GNU pour plus de détails.
+commercialisation ou d'adaptation dans un but spÃ©cifique. Reportez-vous Ã  la
+Licence Publique GÃ©nÃ©rale GNU pour plus de dÃ©tails.
 
-Vous devez avoir reçu une copie de la Licence Publique Générale GNU en même
-temps que ce programme ; si ce n'est pas le cas, écrivez à la Free Software
+Vous devez avoir reÃ§u une copie de la Licence Publique GÃ©nÃ©rale GNU en mÃªme
+temps que ce programme ; si ce n'est pas le cas, Ã©crivez Ã© la Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307,
-États-Unis.
+Ã‰tats-Unis.
 
 Contact: Guillaume.Huard@imag.fr
-	 Bâtiment IMAG
+	 BÃ¢timent IMAG
 	 700 avenue centrale, domaine universitaire
-	 38401 Saint Martin d'Hères
+	 38401 Saint Martin d'HÃ¨res
 */
 #ifndef __REGISTERS_H__
 #define __REGISTERS_H__
 #include <stdint.h>
 
-// La spécification et documentation pour tout ce qui concerne les registres se trouve à la section A2.3 Registers (page 42 du PDF) du Reference Manual
+// La spÃ©cification et documentation pour tout ce qui concerne les registres se trouve Ã  la section A2.3 Registers (page 42 du PDF) du Reference Manual
 
-// la structure registers, qui est une interface (l'utilisateur n'a pas besoin de savoir comment elle est implémentée, il n'a qu'à s'en servir grâce aux fonctions données)
+// la structure registers, qui est une interface (l'utilisateur n'a pas besoin de savoir comment elle est implÃ©mentÃ©e, il n'a qu'Ã  s'en servir grÃ¢ce aux fonctions donnÃ©es)
 typedef struct registers_data *registers;
 
 /* 
-	Entrée : void
-	Sortie : un groupe des registres, initialisé
-	Effets de bord : alloue de la mémoire pour les registres
+	EntrÃ©e : void
+	Sortie : un groupe des registres, initialisÃ©
+	Effets de bord : alloue de la mÃ©moire pour les registres
 */
 registers registers_create();
 
 /*
-	Entrée : un groupe de registres
+	EntrÃ©e : un groupe de registres
 	Sorties : void
-	Effets de bord : libère la mémoire allouée aux registres donnés, les efface
+	Effets de bord : libÃ¨re la mÃ©moire allouÃ©e aux registres donnÃ©s, les efface
 	N'a aucun effet si r == NULL
 */
 void registers_destroy(registers r);
 
 /*
-	Entrée : un groupe de registres
-	Sortie : un uint8_t dont la valeur correspond aux cinq bits [4:0] du registre CPSR. Ils représentent un des sept modes possibles
+	EntrÃ©e : un groupe de registres
+	Sortie : un uint8_t dont la valeur correspond aux cinq bits [4:0] du registre CPSR. Ils reprÃ©sentent un des sept modes possibles
 */
 uint8_t get_mode(registers r);
 
 /*
-	Entrée : un groupe de registres
+	EntrÃ©e : un groupe de registres
 	Sortie : 0 si le mode des registres est User ou System, 1 sinon
 */
 int current_mode_has_spsr(registers r);
 
 /*
-	Entrée : un groupe de registres
+	EntrÃ©e : un groupe de registres
 	Sortie : 0 si le mode des registres est User, 1 sinon
 */
 int in_a_privileged_mode(registers r);
 
 /*
-	Entrée : un groupe de registres, un entier correspondant au registre à lire (de 0 à 15)
+	EntrÃ©e : un groupe de registres, un entier correspondant au registre Ã  lire (de 0 Ã  15)
 	si reg n'est pas dans la plage [0..15], la fonction renvoie 0
 	Sortie : le contenu du registre cible
 */
 uint32_t read_register(registers r, uint8_t reg);
 
 /*
-	Entrée : un groupe de registres, un entier correspondant au registre à lire (de 0 à 15)
+	EntrÃ©e : un groupe de registres, un entier correspondant au registre Ã  lire (de 0 Ã  15)
 	si reg n'est pas dans la plage [0..15], la fonction renvoie 0
-	Sortie : le contenu du registre cible, lu comme si le mode était user
+	Sortie : le contenu du registre cible, lu comme si le mode Ã©tait user
 */
 uint32_t read_usr_register(registers r, uint8_t reg);
 
 /*
-	Entrée : un groupe de registres
+	EntrÃ©e : un groupe de registres
 	Sortie : le contenu du registre CPSR
 */
 uint32_t read_cpsr(registers r);
 
 /*
-	Entrée : un groupe de registres
+	EntrÃ©e : un groupe de registres
 	Sortie : le contenu du registre SPSR
 */
 uint32_t read_spsr(registers r);
 
 /*
-	Entrée : un groupe de registres, le numéro d'un registre cible, une valeur à écrire dans ce registre
+	EntrÃ©e : un groupe de registres, le numÃ©ro d'un registre cible, une valeur Ã  Ã©crire dans ce registre
 	si reg n'est pas dans la plage [0..15], la fonction ne fait rien
 	Sortie : void
-	Effets de bords : la valeur value est écrite dans le registre de numéro reg
-	ATTENTION : n'empêche pas l'écriture d'une adresse dans R15 avec [1:0] != 00
+	Effets de bords : la valeur value est Ã©crite dans le registre de numÃ©ro reg
+	ATTENTION : n'empÃªche pas l'Ã©criture d'une adresse dans R15 avec [1:0] != 00
 */
 void write_register(registers r, uint8_t reg, uint32_t value);
 
 /*
-	Entrée : un groupe de registres, le numéro d'un registre cible, une valeur à écrire dans ce registre
+	EntrÃ©e : un groupe de registres, le numÃ©ro d'un registre cible, une valeur Ã  Ã©crire dans ce registre
 	si reg n'est pas dans la plage [0..15], la fonction ne fait rien
 	Sortie : void
-	Effets de bords : la valeur value est écrite dans le registre de numéro reg, comme si le mode était user
-	ATTENTION : n'empêche pas l'écriture d'une adresse dans R15 avec [1:0] != 00
+	Effets de bords : la valeur value est Ã©crite dans le registre de numÃ©ro reg, comme si le mode Ã©tait user
+	ATTENTION : n'empÃªche pas l'Ã©criture d'une adresse dans R15 avec [1:0] != 00
 */
 void write_usr_register(registers r, uint8_t reg, uint32_t value);
 
 /*
-	Entrée : un groupe de registres, une valeur à écrire dans le registre CPSR
+	EntrÃ©e : un groupe de registres, une valeur Ã  Ã©crire dans le registre CPSR
 	Sortie : void
-	Effets de bords : la valeur value est écrite dans CPSR, en ignorant les écritures interdites par le mode actuel
-	ATTENTION : cette fonction n'empêche pas l'écriture d'un code de mode invalide dans CPSR[4:0] !
-	Si un code invalide est écrit dans CPSR, le comportement du processeur devient imprévisible !
+	Effets de bords : la valeur value est Ã©crite dans CPSR, en ignorant les Ã©critures interdites par le mode actuel
+	ATTENTION : cette fonction n'empÃªche pas l'Ã©criture d'un code de mode invalide dans CPSR[4:0] !
+	Si un code invalide est Ã©crit dans CPSR, le comportement du processeur devient imprÃ©visible !
 */
 void write_cpsr(registers r, uint32_t value);
 
 /*
-	Entrée : un groupe de registres, une valeur à écrire dans le registre SPSR
+	EntrÃ©e : un groupe de registres, une valeur Ã  Ã©crire dans le registre SPSR
 	Sortie : void
-	Effets de bords : la valeur value est écrite dans SPSR, en ignorant les écritures interdites par le mode actuel
+	Effets de bords : la valeur value est Ã©crite dans SPSR, en ignorant les Ã©critures interdites par le mode actuel
 */
 void write_spsr(registers r, uint32_t value);
 
