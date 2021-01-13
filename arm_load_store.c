@@ -276,7 +276,7 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 
     // l'adresse mémoire à partir de laquelle aura lieu les accès en lecture/écriture
     uint32_t address = arm_read_register(p, rn_register);
-    if(is_p_bit_set)
+    if(is_p_bit_set) // adressage pré-indexé
         address += is_upwards_transfert ? 4 : -4;
 
     if(!is_s_bit_set) { // prérequis pour les instructions LDM(1) et STM(1)
@@ -324,8 +324,11 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
         return UNDEFINED_INSTRUCTION;
     }
 
-    if(is_writeback_mode)
+    if(is_writeback_mode) {
+        if(is_p_bit_set) // si on est en adressage pré-indexé l'adresse a alors un pas de trop
+            address -= is_upwards_transfert ? 4 : -4;
         arm_write_register(p, rn_register, address);
+    }
 
     return 0;
 }
