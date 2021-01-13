@@ -2,10 +2,13 @@
 .text
 
 main:
+    # tous les instructions de conditions a execute en dependant les flags.
+    # les calculs ou les comparasons peuvent midifie les flags dans les cas differents.
 	mov r0, #1
     subs r0, r0, #2
     addmis r0, #10
 
+    # NE et EQ lire le flag Z. La comparason cmp modifie le Z si les deux valeurs sont identiques.
 	# NE
     # Apres la comparason, le ne s'effectue que les deux valeurs sont egale
     # resultat attendu : r3 = 1
@@ -23,6 +26,7 @@ main:
     moveq r4, #2
     movne r4, #1 
 
+
     # CS     
     # apres le adds, C set, r0 = 1
     # resultat attendu : r0 = 3
@@ -30,7 +34,6 @@ main:
     movs r1, #2
     adds r0, r1, r0
     addcs r0, r0, r1
-
 
     # HS   
     # apres le adds, C set, r0 = 1
@@ -123,6 +126,7 @@ main:
     cmp r0, r1          
     movLS r5, #5 
 
+    # GE, LT, GT, LE traitent les comparasons entre les entriers signed
     # GE
     # dans la comparason, si op1 >= op2, donc ge execute
     # resultat attendu:
