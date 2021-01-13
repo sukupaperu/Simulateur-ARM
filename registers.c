@@ -135,11 +135,11 @@ uint32_t read_register(registers r, uint8_t reg) {
     } else if (reg <= 15) { 
         uint8_t current_mode = get_mode(r);
 
-        // registres communs (R8 � R12) � tous sauf FIQ
+        // registres communs (R8 à R12) à tous sauf FIQ
         if (current_mode != FIQ && reg < 13) { 
             value = r->main_registers[reg];
 
-        // registres R8 � R14 sp�cifiques � FIQ
+        // registres R8 à R14 spécifiques à FIQ
         // la partie la plus complexe, les registres 13 et 14 des interruptions
         } else {
             uint8_t banked_register_number = get_banked_register_from_mode(current_mode, reg);
@@ -182,7 +182,7 @@ uint32_t read_spsr(registers r) {
 
 void write_register(registers r, uint8_t reg, uint32_t value) {
 
-    // si le registre est un unbanked ou si on est pas en mode interruption, l'�criture est facile
+    // si le registre est un unbanked ou si on est pas en mode interruption, l'écriture est facile
     if (reg < 8 || reg == 15 || !current_mode_has_spsr(r)) {
         r->main_registers[reg] = value;
 
@@ -190,7 +190,7 @@ void write_register(registers r, uint8_t reg, uint32_t value) {
     } else if (reg <= 15) { 
         uint8_t current_mode = get_mode(r);
 
-        // registres communs (R8 � R12) � tous sauf FIQ
+        // registres communs (R8 à R12) à tous sauf FIQ
         if (current_mode != FIQ && reg < 13) {
             r->main_registers[reg] = value;
 
@@ -236,13 +236,13 @@ void write_cpsr(registers r, uint32_t value) {
 }
 
 
-// fonction identique � write_cpsr mais qui tient compte du mode courant
+// fonction identique à write_cpsr mais qui tient compte du mode courant
 void write_spsr(registers r, uint32_t value) {
 
     if (current_mode_has_spsr(r)) {
         uint8_t current_mode = get_mode(r);
         uint8_t register_number = get_register_from_mode(current_mode);
-        uint32_t masque = 0x07F0FC20; // forc�ment un mode privil�gi� si on a SPSR
+        uint32_t masque = 0x07F0FC20; // forcément un mode privilégié si on a SPSR
         
         value |= masque;
         r->psr_registers[register_number] |= ~masque;

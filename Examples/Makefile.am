@@ -17,6 +17,7 @@ example3_SOURCES=example3.s
 example4_SOURCES=example4.s
 insertion_sort_SOURCES=insertion_sort.c
 ex_ADC_SOURCES=ex_ADC.s
+ex_ADD_SOURCES=ex_ADD.s
 ex_AND_SOURCES=ex_AND.s
 ex_EOR_SOURCES=ex_EOR.s
 ex_MRS_SOURCES=ex_MRS.s
