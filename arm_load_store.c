@@ -49,8 +49,6 @@ int arm_load_store(arm_core p, uint32_t ins) {
     uint32_t offset;
     // adresse de base (adresse mémoire à laquelle aura lieu l'accès en lecture/écriture)
     uint32_t address = arm_read_register(p, rn_register);
-    if(rn_register == 15)
-        address += 8;
 
     // vaut 1 si on l'accès mémoire concerne un mot (32bits) ou bien un octet non signé
     int is_word_or_unsigned_byte_access = get_bits(ins, 27, 26) == 0b01;
