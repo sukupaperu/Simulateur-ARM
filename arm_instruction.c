@@ -114,10 +114,6 @@ int arm_step(arm_core p) {
 
 int inst_cond(arm_core p, uint32_t ins) {
     uint32_t flags = arm_read_cpsr(p);
-    /*uint8_t reg;
-    arm_read_register( p, reg);
-    uint32_t flags = read_cpsr(reg);*/
-
     uint32_t flag_N = (flags >> N) & 1;
     uint32_t flag_Z = (flags >> Z) & 1;
     uint32_t flag_C = (flags >> C) & 1;
