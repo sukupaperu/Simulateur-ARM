@@ -1,5 +1,7 @@
 .global main
 .text
+
+main:
     mov r0, #800
     
     # decrement after
@@ -16,4 +18,7 @@
     mov r4, #7
     mov r5, #8
 
+end:
     swi 0x123456
+
+.data
