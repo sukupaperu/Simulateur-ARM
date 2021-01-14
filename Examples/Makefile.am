@@ -6,7 +6,7 @@ AM_LDFLAGS=-nostdlib -T $(srcdir)/linker_script -n --entry main
 AM_LDFLAGS+=-Wl,-EB
 
 if HAVE_ARM_COMPILER
-noinst_PROGRAMS=example1 example2 example3 example4 insertion_sort ex_ADC ex_AND ex_EOR ex_MRS ex_RSB ex_RSC ex_SBC ex_SUB ex_MVN ex_ORR ex_BIC ex_TST ex_TEQ ex_CMP ex_CMN ex_LDR_STR_LDRB_STRB ex_LDRH_STRH ex_LDM_STM ex_COND
+noinst_PROGRAMS=example1 example2 example3 example4 insertion_sort ex_ADC ex_AND ex_EOR ex_MRS ex_RSB ex_RSC ex_SBC ex_SUB ex_MVN ex_ORR ex_BIC ex_TST ex_TEQ ex_CMP ex_CMN ex_LDR_STR_LDRB_STRB ex_LDRH_STRH ex_LDM_STM ex_COND bug_LDM_STM
 
 all-am: $(PROGS)
 endif
@@ -36,6 +36,7 @@ ex_LDR_STR_LDRB_STRB_SOURCES=ex_LDR_STR_LDRB_STRB.s
 ex_LDRH_STRH_SOURCES=ex_LDRH_STRH.s
 ex_LDM_STM_SOURCES=ex_LDM_STM.s
 ex_COND_SOURCES=ex_COND.s
+bug_LDM_STM_SOURCES=bug_LDM_STM.s
 
 EXTRA_DIST=linker_script
 

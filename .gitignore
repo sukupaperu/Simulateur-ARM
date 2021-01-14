@@ -24,6 +24,7 @@ Examples/ex_LDR_STR_LDRB_STRB
 Examples/ex_LDRH_STRH
 Examples/ex_LDM_STM
 Examples/ex_COND
+Examples/bug_LDM_STM
 
 autom4te.cache
 .deps
